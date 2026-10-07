@@ -1,0 +1,2134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>陪伴小狗</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="陪伴小狗">
+<meta name="theme-color" content="#FFD6E8">
+<link rel="apple-touch-icon" href="assets/pwa-icon-192.png">
+<link rel="icon" href="assets/pwa-icon-192.png">
+<style>
+:root{
+  --bg-1:#FFF5F8; --bg-2:#FFE1EA;
+  --rose:#F49BB7; --rose-deep:#E87CA0;
+  --ink:#7C4256; --ink-soft:#A96880;
+  --card:#FFFDFE; --shadow:rgba(214,120,148,.28);
+  --hunger:#A9743F; --clean:#6FA8DC; --mood:#F08CB4; --energy:#9B7FD4; --health:#7FB87A;
+  --bar-bg:rgba(124,66,86,.10);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",system-ui,sans-serif;
+  color:var(--ink);background:var(--bg-1);
+  display:flex;justify-content:center;
+  overflow:hidden;
+}
+#app{
+  width:100%;max-width:480px;height:100%;
+  background:
+    radial-gradient(120% 90% at 85% -10%, rgba(255,255,255,.9) 0%, rgba(255,255,255,0) 55%),
+    radial-gradient(100% 80% at 10% 110%, rgba(255,209,224,.75) 0%, rgba(255,209,224,0) 55%),
+    linear-gradient(160deg, var(--bg-1) 0%, var(--bg-2) 100%);
+  position:relative;overflow:hidden;
+}
+.view{position:absolute;inset:0;display:none;flex-direction:column}
+.view.on{display:flex}
+
+/* ===== Logo 页 ===== */
+#view-logo{justify-content:center;align-items:center;text-align:center;cursor:pointer}
+#view-logo .logo-wrap{animation:logo-pop .9s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes logo-pop{from{opacity:0;transform:scale(.8) translateY(14px)}to{opacity:1;transform:none}}
+#view-logo h1{
+  font-size:44px;font-weight:800;letter-spacing:6px;color:var(--rose-deep);
+  text-shadow:0 3px 14px rgba(232,124,160,.35);
+}
+#view-logo .sub{margin-top:14px;font-size:14px;letter-spacing:3px;color:var(--ink-soft)}
+#view-logo .tap{margin-top:46px;font-size:12px;color:var(--ink-soft);letter-spacing:2px;animation:fade-blink 2.2s ease-in-out infinite}
+@keyframes fade-blink{0%,100%{opacity:.45}50%{opacity:1}}
+#view-logo .deco{position:absolute;border-radius:50%;background:rgba(255,255,255,.5)}
+#view-logo .d1{width:120px;height:120px;top:12%;left:8%}
+#view-logo .d2{width:80px;height:80px;top:20%;right:10%}
+#view-logo .d3{width:150px;height:150px;bottom:10%;right:14%}
+#view-logo .d4{width:70px;height:70px;bottom:22%;left:12%}
+
+/* ===== 选狗页 ===== */
+#view-select{padding:34px 18px 22px;overflow-y:auto}
+#view-select h2{font-size:22px;font-weight:800;color:var(--rose-deep);text-align:center;letter-spacing:2px}
+#view-select .tip{text-align:center;font-size:12px;color:var(--ink-soft);margin:8px 0 18px;letter-spacing:1px}
+.dog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.dog-card{
+  background:rgba(255,253,254,.88);border:2px solid rgba(244,155,183,.45);
+  border-radius:18px;padding:10px 6px 8px;text-align:center;cursor:pointer;
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.dog-card:active{transform:scale(.96)}
+.dog-card:hover{transform:translateY(-3px);border-color:var(--rose);box-shadow:0 8px 18px rgba(214,120,148,.2)}
+.dog-card img{width:100%;aspect-ratio:1/1;object-fit:contain}
+.dog-card .name{font-size:14px;font-weight:700;color:var(--ink);margin-top:2px}
+.dog-card .growth{font-size:10px;color:var(--ink-soft)}
+
+/* ===== 主界面 ===== */
+#view-main{padding-top:8px}
+.top-area{display:flex;align-items:center;gap:10px;padding:8px 14px 4px}
+.avatar-col{flex:none;width:58px;text-align:center}
+.avatar{width:52px;height:52px;border-radius:16px;background:rgba(255,255,255,.92);border:2px solid rgba(244,155,183,.55);
+  box-shadow:0 3px 8px rgba(214,120,148,.2);display:flex;align-items:center;justify-content:center;overflow:hidden;margin:0 auto}
+.avatar img{width:100%;height:100%;object-fit:contain}
+.pet-name{font-size:10px;font-weight:700;color:var(--ink);margin-top:3px;letter-spacing:.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:58px}
+.bars-col{flex:1;display:flex;flex-direction:column;gap:6px}
+.bar-row{display:flex;align-items:center;gap:6px}
+.bar-row .lbl{width:38px;font-size:10px;font-weight:700;color:var(--ink);flex:none}
+.bar{flex:1;height:13px;border-radius:8px;background:var(--bar-bg);overflow:hidden;position:relative;border:1px solid rgba(255,255,255,.9)}
+.bar .fill{height:100%;border-radius:8px;width:100%;transition:width .5s cubic-bezier(.3,1,.3,1);box-shadow:inset 0 0 0 1px rgba(255,255,255,.75)}
+.bar-hunger .fill{background:linear-gradient(90deg,#C99A63,var(--hunger))}
+.bar-clean .fill{background:linear-gradient(90deg,#9CC4EC,var(--clean))}
+.bar-mood .fill{background:linear-gradient(90deg,#F7A9C8,var(--mood))}
+.bar-energy .fill{background:linear-gradient(90deg,#BDA7E4,var(--energy))}
+.bar-health .fill{background:linear-gradient(90deg,#A8D6A4,var(--health))}
+
+/* 全部文字与数值：白色细描边 */
+#view-logo h1,#view-logo .sub,#view-logo .tap,
+#view-select h2,#view-select .tip,.dog-card .name,.dog-card .growth,
+.view .lbl,.a-btn span,.bubble,.panel h3,.opt .t,.opt .d,.sleep-hint{
+  text-shadow:1px 0 0 #fff,-1px 0 0 #fff,0 1px 0 #fff,0 -1px 0 #fff,
+    1px 1px 0 #fff,-1px -1px 0 #fff,1px -1px 0 #fff,-1px 1px 0 #fff;
+}
+
+.scene{
+  --w1:#A9C9E6; --w2:#C3DCEE; --w3:#D2E6F6;
+  --f1:#F7E3BA; --f2:#F4DAA4; --f3:#F1D296;
+  --dot:rgba(255,255,255,.5);
+  --base1:#FAF6EC; --base2:#E9E0CD; --baseb:#D9CDB6;
+  --floorline:rgba(196,160,96,.16);
+  flex:1;position:relative;margin:2px 12px 0;border-radius:26px;overflow:hidden;
+  background:linear-gradient(180deg,var(--f1) 0%,var(--f2) 46%,var(--f3) 100%);
+  box-shadow:inset 0 2px 14px rgba(124,66,86,.12);
+}
+.scene[data-theme="pink"]{
+  --w1:#F4B8D0; --w2:#F8CFDF; --w3:#FBE2EC;
+  --f1:#F8E2E6; --f2:#F4D2DA; --f3:#EFC4CE;
+  --dot:rgba(255,255,255,.6);
+  --base1:#FDF6F7; --base2:#F0DDE2; --baseb:#E0C2CB;
+  --floorline:rgba(210,140,160,.14);
+}
+.scene[data-theme="grass"]{
+  --w1:#B7D8A8; --w2:#CBE4BC; --w3:#DCEED0;
+  --f1:#CBE5B2; --f2:#BCDA9E; --f3:#AECF8F;
+  --dot:rgba(255,255,255,.55);
+  --base1:#F4F9EE; --base2:#DDE8CD; --baseb:#C4D4AC;
+  --floorline:rgba(120,160,90,.18);
+}
+.scene[data-theme="dusk"]{
+  --w1:#F3C4A5; --w2:#F8D6BC; --w3:#FCE5D3;
+  --f1:#F6D3AC; --f2:#F0C192; --f3:#E8AE7C;
+  --dot:rgba(255,255,255,.55);
+  --base1:#FDF3E8; --base2:#EFDDC6; --baseb:#DFC5A4;
+  --floorline:rgba(190,120,60,.18);
+}
+.scene[data-theme="starry"]{
+  --w1:#18234A; --w2:#1F2C5C; --w3:#283772;
+  --f1:#454A6B; --f2:#3D4160; --f3:#363A55;
+  --dot:rgba(255,255,255,.75);
+  --base1:#4A5073; --base2:#3E4464; --baseb:#2C3150;
+  --floorline:rgba(150,160,240,.14);
+}
+.star{position:absolute;border-radius:50%;background:#fff;
+  box-shadow:0 0 4px rgba(255,255,255,.95),0 0 12px rgba(255,255,255,.55);
+  animation:twinkle ease-in-out infinite alternate}
+@keyframes twinkle{from{opacity:.2;transform:scale(.75)}to{opacity:1;transform:scale(1.2)}}
+.scene .wall{position:absolute;left:0;right:0;top:0;height:52%;
+  background:
+    radial-gradient(120% 95% at 50% -5%, rgba(255,255,255,.55) 0%, rgba(255,255,255,0) 60%),
+    linear-gradient(180deg,var(--w1) 0%,var(--w2) 55%,var(--w3) 100%);
+}
+.scene .wall::after{content:"";position:absolute;left:0;right:0;bottom:-8px;height:18px;
+  background:linear-gradient(180deg,var(--base1) 0%,var(--base2) 100%);
+  border-bottom:3px solid var(--baseb)}
+.scene .wall .dot{position:absolute;width:9px;height:9px;border-radius:50%;background:var(--dot)}
+.scene .floor{position:absolute;left:0;right:0;bottom:0;height:48%;
+  background:
+    repeating-linear-gradient(90deg, var(--floorline) 0 2px, rgba(196,160,96,0) 2px 66px),
+    radial-gradient(95% 130% at 50% 100%, rgba(255,255,255,.38) 0%, rgba(255,255,255,0) 60%)}
+.bubble{
+  position:absolute;left:50%;top:10px;transform:translateX(-50%);
+  background:var(--card);border:1.5px solid rgba(244,155,183,.55);border-radius:16px;
+  padding:8px 14px;font-size:13px;line-height:1.55;color:var(--ink);
+  box-shadow:0 4px 14px rgba(214,120,148,.16);
+  max-width:86%;text-align:center;z-index:6;
+  opacity:0;transform:translate(-50%,6px) scale(.96);
+  transition:opacity .25s ease, transform .25s ease;
+}
+.bubble.show{opacity:1;transform:translate(-50%,0) scale(1)}
+.bubble::after{content:"";position:absolute;left:50%;bottom:-6px;width:11px;height:11px;background:var(--card);
+  border-right:1.5px solid rgba(244,155,183,.55);border-bottom:1.5px solid rgba(244,155,183,.55);
+  transform:translateX(-50%) rotate(45deg)}
+.bubble .w{color:var(--rose-deep);font-weight:800}
+
+.dog-wrap{position:absolute;left:0;top:0;z-index:4;will-change:transform}
+.dog-box{position:relative;width:min(31vw,146px);aspect-ratio:1/1;will-change:transform}
+.dog-box.breathe{animation:breathe 3.2s ease-in-out infinite alternate}
+.dog-box.breathe-soft{animation:breathe-soft 4.8s ease-in-out infinite alternate}
+.dog-box img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;transition:opacity .2s ease, transform .2s ease}
+.dog-box img.hidden{opacity:0}
+.dog-box img.active{opacity:1}
+.dog-box img.jump-air{transform:translateY(-42px) scale(1.02)}
+@keyframes breathe{from{transform:translateY(0) scale(1)}to{transform:translateY(-7px) scale(1.02)}}
+@keyframes breathe-soft{from{transform:translateY(0) scale(1)}to{transform:translateY(-4px) scale(1.015)}}
+.ground-shadow{position:absolute;left:50%;bottom:1px;transform:translateX(-50%);
+  width:70%;height:15px;border-radius:50%;
+  background:radial-gradient(ellipse at center, rgba(150,108,66,.32) 0%, rgba(150,108,66,0) 68%);
+  transition:transform .3s ease, opacity .3s ease}
+.dog-box.air ~ .ground-shadow{transform:translateX(-50%) scale(.75);opacity:.5}
+
+/* 球与玩具 */
+.toy{position:absolute;z-index:5;touch-action:none;will-change:transform}
+.ball{
+  width:56px;height:56px;border-radius:50%;
+  background:radial-gradient(circle at 32% 30%, #FFE9C9 0%, #F7B267 40%, #E88B3C 100%);
+  box-shadow:inset -4px -6px 10px rgba(180,90,20,.35), 0 6px 12px rgba(180,110,40,.25);
+  cursor:grab;
+}
+.ball:active{cursor:grabbing}
+.ball-shadow{position:absolute;width:34px;height:12px;border-radius:50%;background:rgba(140,90,60,.3);
+  transform:translate(-50%,-50%);transition:opacity .15s ease, transform .15s ease;z-index:4;pointer-events:none}
+.stick{
+  width:76px;height:22px;border-radius:10px;
+  background:linear-gradient(180deg,#E7A15C 0%,#C97B3D 100%);
+  box-shadow:inset 0 2px 3px rgba(255,255,255,.4), 0 5px 10px rgba(160,100,50,.3);
+  transform-origin:center;
+}
+.toy-drop{animation:toy-drop .55s cubic-bezier(.3,1.4,.4,1) both}
+@keyframes toy-drop{
+  0%{transform:translateY(-240px) scale(.5);opacity:0}
+  60%{transform:translateY(0) scale(1.08)}
+  75%{transform:translateY(-26px) scale(.97)}
+  100%{transform:translateY(0) scale(1);opacity:1}
+}
+
+/* 底部操作栏 */
+.action-bar{display:flex;gap:10px;padding:10px 14px 16px}
+.a-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+  background:rgba(255,253,254,.92);border:1.5px solid rgba(244,155,183,.55);
+  border-radius:16px;padding:9px 4px 7px;cursor:pointer;
+  transition:transform .15s ease, box-shadow .18s ease;
+}
+.a-btn:active{transform:scale(.94)}
+.a-btn:hover{box-shadow:0 6px 14px rgba(214,120,148,.2)}
+.a-btn svg{width:22px;height:22px;color:var(--rose-deep)}
+.a-btn span{font-size:12px;font-weight:700;color:var(--ink)}
+
+/* ===== 取名页 ===== */
+#view-name{justify-content:center;align-items:center;padding:30px}
+.name-box{width:100%;max-width:340px;text-align:center;background:rgba(255,253,254,.92);
+  border:2px solid rgba(244,155,183,.45);border-radius:26px;padding:26px 22px 24px;
+  box-shadow:0 10px 26px rgba(214,120,148,.18)}
+#view-name h2{font-size:20px;font-weight:800;color:var(--rose-deep);letter-spacing:2px}
+.name-preview{width:150px;height:150px;margin:16px auto 14px;border-radius:22px;background:#fff;
+  border:2px solid rgba(244,155,183,.4);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.name-preview img{width:100%;height:100%;object-fit:contain}
+#nameInput{width:100%;height:44px;border:2px solid rgba(244,155,183,.55);border-radius:14px;
+  background:#FFF7FA;font-size:16px;text-align:center;color:var(--ink);outline:none;font-family:inherit}
+#nameInput:focus{border-color:var(--rose)}
+.name-btn{width:100%;height:46px;margin-top:14px;border:none;border-radius:16px;
+  background:linear-gradient(135deg,#F49BB7,#E87CA0);color:#fff;font-size:16px;font-weight:800;
+  letter-spacing:3px;cursor:pointer;box-shadow:0 6px 16px rgba(232,124,160,.35)}
+.name-btn:active{transform:scale(.96)}
+
+/* ===== 设置面板 ===== */
+.set-row{display:flex;align-items:center;gap:10px;margin-top:16px}
+
+/* ===== 对话面板 ===== */
+.chat-panel{max-height:68vh;display:flex;flex-direction:column}
+.chat-log{flex:1;overflow-y:auto;margin-top:12px;display:flex;flex-direction:column;gap:8px;min-height:120px;max-height:36vh}
+.chat-msg{max-width:78%;padding:8px 12px;border-radius:14px;font-size:13px;line-height:1.55;word-break:break-word}
+.chat-msg.me{align-self:flex-start;background:#F1E4F5;color:var(--ink);border-bottom-left-radius:4px}
+.chat-msg.dog{align-self:flex-end;background:#FFF1F5;border:1.5px solid rgba(244,155,183,.5);color:var(--ink);border-bottom-right-radius:4px}
+.chat-msg .w{font-weight:800;color:var(--rose-deep)}
+.chat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px;
+  max-height:26vh;overflow-y:auto;padding:2px}
+.chat-grid button{background:#FFF4F8;border:1.5px solid rgba(244,155,183,.45);border-radius:14px;
+  padding:12px 10px;font-size:13px;font-weight:700;color:var(--ink);cursor:pointer;
+  transition:transform .12s ease, background .16s ease}
+.chat-grid button:active{transform:scale(.95);background:#FFE7EF}
+.set-lbl{width:64px;font-size:13px;font-weight:700;color:var(--ink);flex:none}
+#volSlider{flex:1;-webkit-appearance:none;appearance:none;height:6px;border-radius:4px;
+  background:linear-gradient(90deg,#F49BB7,var(--rose));outline:none}
+#volSlider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;
+  background:#fff;border:2px solid var(--rose-deep);cursor:pointer;box-shadow:0 2px 6px rgba(214,120,148,.3)}
+.set-val{width:44px;font-size:12px;color:var(--ink-soft);font-weight:700;text-align:right}
+.theme-row{flex:1;display:flex;gap:8px}
+.theme-swatch{width:34px;height:34px;border-radius:12px;cursor:pointer;border:2px solid rgba(124,66,86,.18);
+  position:relative;transition:transform .15s ease, border-color .15s ease}
+.theme-swatch.on{border-color:var(--rose-deep);transform:scale(1.08)}
+.theme-swatch.on::after{content:"✓";position:absolute;right:3px;bottom:1px;font-size:11px;color:#fff;
+  font-weight:800;text-shadow:0 0 2px rgba(0,0,0,.4)}
+.reset-row{justify-content:center;margin-top:20px;border-top:1px dashed rgba(244,155,183,.4);padding-top:16px}
+.reset-btn{width:100%;height:44px;border:2px solid #E87CA0;border-radius:14px;background:#FFF4F8;
+  color:var(--rose-deep);font-size:14px;font-weight:800;letter-spacing:1px;cursor:pointer}
+.reset-btn:active{transform:scale(.97)}
+
+/* 弹层 */
+.mask{position:absolute;inset:0;background:rgba(124,66,86,.28);z-index:20;display:none;justify-content:center;align-items:flex-end}
+.mask.on{display:flex}
+.panel{background:var(--card);width:100%;border-radius:24px 24px 0 0;padding:18px 18px 26px;animation:slide-up .28s cubic-bezier(.3,1,.3,1) both}
+@keyframes slide-up{from{transform:translateY(60px);opacity:.6}to{transform:none;opacity:1}}
+.panel h3{font-size:17px;font-weight:800;color:var(--rose-deep);text-align:center;margin-bottom:14px}
+.panel .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.opt{display:flex;flex-direction:column;align-items:center;gap:5px;background:#FFF4F8;
+  border:1.5px solid rgba(244,155,183,.4);border-radius:14px;padding:10px 4px 8px;cursor:pointer;
+  transition:transform .15s ease, background .18s ease}
+.opt:active{transform:scale(.93);background:#FFE7EF}
+.opt .ico{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-weight:800;color:#fff}
+.opt .t{font-size:11.5px;font-weight:700;color:var(--ink)}
+.opt .d{font-size:10px;color:var(--ink-soft);text-align:center;line-height:1.3}
+.ico-bone{background:#C99A63}.ico-food{background:#B98A4E}.ico-can{background:#A9A2C9}.ico-snack{background:#E8B07A}
+.ico-soap{background:#8FC1E8}.ico-soap2{background:#F0A8C0}.ico-soap3{background:#A9C48F}.ico-soap4{background:#E8C98A}
+.ico-ball{background:#F0A45C}.ico-stick{background:#C97B3D}
+.panel .close{position:absolute;top:12px;right:16px;font-size:22px;color:var(--ink-soft);cursor:pointer;line-height:1}
+
+/* 信弹窗（兑换码） */
+.letter-mask{align-items:center}
+.letter-panel{width:86%;max-width:340px;border-radius:20px;padding:24px 22px 28px;text-align:center;box-shadow:0 10px 32px rgba(124,66,86,.25)}
+.letter-body{font-size:14px;line-height:2.05;color:var(--ink);white-space:pre-line;text-align:left;margin-top:4px}
+.letter-sign{display:block;text-align:center;font-weight:800;color:var(--rose-deep);font-size:16px;margin-top:14px}
+.letter-divider{display:block;text-align:center;color:var(--ink-soft);font-size:13px;margin-top:6px;letter-spacing:1px}
+
+/* BGM */
+.bgm-btn{position:absolute;top:8px;right:10px;z-index:10;width:34px;height:34px;border-radius:50%;
+  background:rgba(255,253,254,.85);border:1.5px solid rgba(244,155,183,.5);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.bgm-btn svg{width:17px;height:17px;color:var(--rose-deep)}
+.sleep-hint{position:absolute;bottom:12%;left:0;right:0;text-align:center;font-size:12px;color:var(--ink-soft);z-index:6}
+@media (prefers-reduced-motion: reduce){
+  .dog-box.breathe,.dog-box.breathe-soft,.dog-box img{animation:none;transition:none}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ===== Logo 页 ===== -->
+  <div class="view" id="view-logo">
+    <div class="deco d1"></div><div class="deco d2"></div><div class="deco d3"></div><div class="deco d4"></div>
+    <div class="logo-wrap">
+      <h1>陪伴小狗</h1>
+      <div class="sub">领取你的小狗</div>
+    </div>
+    <div class="tap">轻触屏幕，开始陪伴</div>
+  </div>
+
+  <!-- ===== 选狗页 ===== -->
+  <div class="view" id="view-select">
+    <h2>选择你的小狗</h2>
+    <div class="tip">它会一直在这里等你回来</div>
+    <div class="dog-grid" id="dogGrid"></div>
+  </div>
+
+  <!-- ===== 取名页 ===== -->
+  <div class="view" id="view-name">
+    <div class="name-box">
+      <h2>给它取个名字</h2>
+      <div class="name-preview"><img id="nameDogImg" alt="所选小狗"></div>
+      <input id="nameInput" maxlength="8" placeholder="输入小狗的名字">
+      <button class="name-btn" id="nameOk">开始陪伴</button>
+    </div>
+  </div>
+
+  <!-- ===== 主界面 ===== -->
+  <div class="view" id="view-main">
+    <div class="top-area">
+      <div class="avatar-col">
+        <div class="avatar" id="avatarBox"><img id="avatarImg" alt="头像"></div>
+        <div class="pet-name" id="petName">小狗</div>
+      </div>
+      <div class="bars-col">
+        <div class="bar-row"><span class="lbl">饱食</span><div class="bar bar-hunger"><div class="fill" id="bar-hunger"></div></div></div>
+        <div class="bar-row"><span class="lbl">清洁</span><div class="bar bar-clean"><div class="fill" id="bar-clean"></div></div></div>
+        <div class="bar-row"><span class="lbl">心情</span><div class="bar bar-mood"><div class="fill" id="bar-mood"></div></div></div>
+        <div class="bar-row"><span class="lbl">精力</span><div class="bar bar-energy"><div class="fill" id="bar-energy"></div></div></div>
+        <div class="bar-row"><span class="lbl">健康</span><div class="bar bar-health"><div class="fill" id="bar-health"></div></div></div>
+      </div>
+    </div>
+
+    <div class="scene" id="scene">
+      <div class="wall">
+        <div class="dot" style="left:7%;top:16%"></div>
+        <div class="dot" style="left:20%;top:52%"></div>
+        <div class="dot" style="left:36%;top:24%"></div>
+        <div class="dot" style="left:55%;top:58%"></div>
+        <div class="dot" style="left:73%;top:18%"></div>
+        <div class="dot" style="left:89%;top:48%"></div>
+      </div>
+      <div class="floor"></div>
+      <div class="bubble" id="bubble"><span class="w" id="bw"></span><span id="bm"></span></div>
+      <button class="bgm-btn" id="bgmBtn" title="背景音乐">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg>
+      </button>
+      <button class="bgm-btn" id="setBtn" title="设置" style="right:54px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+      <div class="dog-wrap" id="dogWrap">
+        <div class="dog-box breathe" id="dogBox"><!-- 帧由 JS 注入 --></div>
+        <div class="ground-shadow" id="groundShadow"></div>
+      </div>
+      <div id="toyLayer"></div>
+      <div class="sleep-hint" id="sleepHint" style="display:none"></div>
+    </div>
+
+    <div class="action-bar">
+      <button class="a-btn" id="btnFeed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12h16M7 20l2-8M17 20l-2-8"/><path d="M8 8c0-2 1.5-3 4-3s4 1 4 3"/></svg><span>喂食</span></button>
+      <button class="a-btn" id="btnBath"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12h16v2a6 6 0 0 1-6 6H10a6 6 0 0 1-6-6v-2z"/><path d="M6 12V6a2 2 0 0 1 4 0M12 8v2"/></svg><span>洗澡</span></button>
+      <button class="a-btn" id="btnPlay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 8.5l3 3M12 15.5l3.5-3.5"/></svg><span>玩耍</span></button>
+      <button class="a-btn" id="btnChat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H9l-4 4v-4H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/><path d="M8.5 10h7M8.5 13h4"/></svg><span>对话</span></button>
+    </div>
+  </div>
+
+  <!-- ===== 弹层 ===== -->
+  <div class="mask" id="maskFeed"><div class="panel"><span class="close" data-close="maskFeed">×</span><h3>喂饱它</h3><div class="grid" id="feedGrid"></div></div></div>
+  <div class="mask" id="maskBath"><div class="panel"><span class="close" data-close="maskBath">×</span><h3>洗香香</h3><div class="grid" id="bathGrid"></div></div></div>
+  <div class="mask" id="maskPlay"><div class="panel"><span class="close" data-close="maskPlay">×</span><h3>一起玩</h3><div class="grid" id="playGrid"></div></div></div>
+  <div class="mask" id="maskChat"><div class="panel chat-panel">
+    <span class="close" data-close="maskChat">×</span>
+    <h3>跟它聊聊</h3>
+    <div class="chat-log" id="chatLog"></div>
+    <div class="chat-grid" id="chatGrid"></div>
+  </div></div>
+  <div class="mask" id="maskSet"><div class="panel">
+    <span class="close" data-close="maskSet">×</span>
+    <h3>设置</h3>
+    <div class="set-row">
+      <span class="set-lbl">BGM 音量</span>
+      <input type="range" id="volSlider" min="0" max="100" value="60">
+      <span class="set-val" id="volVal">60%</span>
+    </div>
+    <div class="set-row">
+      <span class="set-lbl">更换背景</span>
+      <div class="theme-row" id="themeRow"></div>
+    </div>
+    <div class="set-row">
+      <span class="set-lbl">兑换码</span>
+      <input type="text" id="redeemInput" maxlength="24" placeholder="输入兑换码" style="flex:1;border:1.5px solid rgba(244,155,183,.5);border-radius:14px;padding:9px 12px;font-size:13px;background:#FFFDFE;color:var(--ink);outline:none">
+    </div>
+    <div class="set-row">
+      <button class="reset-btn" id="redeemBtn" style="border-color:#C9A0DC;color:#A06BC0;background:#FBF6FF">兑换</button>
+    </div>
+    <div class="set-row reset-row">
+      <button class="reset-btn" id="resetBtn">重置游戏</button>
+    </div>
+  </div></div>
+  <div class="mask letter-mask" id="maskLetter">
+    <div class="panel letter-panel">
+      <span class="close" data-close="maskLetter">×</span>
+      <h3>一封信</h3>
+      <div class="letter-body">已经不知道是你的第几个生日了
+一时间还真想不到说什么好
+只是看着你最近一直消沉的样子
+也不由得难过起来
+很想帮你做点什么
+但又没什么真正能做到的
+朋友也好其他什么也好
+也没办法真的陪着你
+能做的也就只有这个粗制的小东西了
+就算是不打起精神也没关系
+只希望能稍微让你心情好一点</div>
+      <span class="letter-sign">生日快乐</span>
+      <span class="letter-divider">————————</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ============================================================
+   陪伴小狗 —— 游戏逻辑
+   素材目录：assets/{dog}/{run-01..04,walk-01..03,lie-01,sleep-01,jump-01..03,chew-01,expr-happy,sad,angry}.png
+   立绘：assets/select-{dog}.png
+   ============================================================ */
+var DOGS = {
+  samoyed:    {name:"萨摩耶",  growth:"幼年·少年·成年"},
+  pomeranian: {name:"博美",    growth:"幼年·少年"},
+  bichon:     {name:"比熊",    growth:"幼年·少年"}
+};
+
+var DECAY_PER_SEC = 100 / (16 * 3600);          // 全满 16 小时降到 0
+var HEALTH_REGEN   = 0.004;                      // 正常时健康缓慢恢复 /s
+var HEALTH_DROP    = 0.012;                      // 任一项 <10 时健康下降 /s
+var STAT_MIN       = 10;                          // 低于此值触发健康下降
+
+var FEEDS = {
+  bone:  {label:"骨头",   cls:"ico-bone",  gain:35,  mood:6,  msg:"（咔嚓咔嚓，骨头真香！）"},
+  food:  {label:"狗粮",   cls:"ico-food",  gain:28,  mood:5,  msg:"（吧唧吧唧，狗粮也好吃！）"},
+  can:   {label:"宠物罐头", cls:"ico-can", gain:42,  mood:8,  msg:"（哇，罐头！是今天的大餐！）"},
+  snack: {label:"小零食", cls:"ico-snack", gain:16,  mood:9,  msg:"（嘿嘿，有零食奖励！）"}
+};
+var SOAPS = [
+  {label:"花香沐浴露", cls:"ico-soap",  word:"花香"},
+  {label:"蜜桃沐浴露", cls:"ico-soap2", word:"蜜桃"},
+  {label:"青草沐浴露", cls:"ico-soap3", word:"青草"},
+  {label:"奶香沐浴露", cls:"ico-soap4", word:"奶香"}
+];
+var PLAYS = {
+  ball:  {label:"小球",   cls:"ico-ball",  desc:"拍球来回"},
+  stick: {label:"磨牙棒", cls:"ico-stick", desc:"咔嚓咔嚓"}
+};
+
+var LS_KEY = "doubao_pet_v1";
+var S = {           // 存档
+  dog: "samoyed",
+  stats: { hunger:100, clean:100, mood:100, energy:100, health:100 },
+  lastSeen: Date.now(),
+  firstSeen: true,
+  ageDays: 0,
+  name: "",
+  theme: "sky"
+};
+
+var state = {
+  act: "idle",            // idle | run | walk | jump | lie | sleep | chew | eat
+  expr: "happy",          // 由心情映射
+  sleeping: false,
+  ballMode: null,         // null | return | chase
+  ballBusy: false,
+  timers: [],
+  bubbleTimer: null,
+  saveTimer: null,
+  roamT: null,
+  wakeGrace: 0
+};
+
+/* ---------- 工具 ---------- */
+function $(id){ return document.getElementById(id); }
+function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
+function randInt(n){ return Math.floor(Math.random()*n); }
+function clearTimers(){
+  state.timers.forEach(function(t){ clearInterval(t); clearTimeout(t); });
+  state.timers = [];
+}
+
+/* ---------- 存档 ---------- */
+function save(){
+  S.stats = {hunger:stats.hunger, clean:stats.clean, mood:stats.mood, energy:stats.energy, health:stats.health};
+  S.lastSeen = Date.now(); S.dog = stats.dog;
+  S.ageDays = S.ageDays || 0;
+  /* 记录小狗当前位置（比例），切后台/刷新后可恢复原位 */
+  try{
+    var s = sceneSize();
+    if(s && s.w > 0){
+      S.pos = {xr: move.x / s.w, yr: move.groundY / s.h, facing: move.facing};
+    }
+  }catch(e){}
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(S)); }catch(e){}
+}
+function load(){
+  try{
+    var raw = localStorage.getItem(LS_KEY);
+    if(raw){
+      var d = JSON.parse(raw);
+      if(d && d.stats){
+        var now = Date.now();
+        var elapsed = (now - (d.lastSeen||now)) / 1000;
+        stats.hunger = clamp(d.stats.hunger - elapsed*DECAY_PER_SEC, 0, 100);
+        stats.clean  = clamp(d.stats.clean  - elapsed*DECAY_PER_SEC, 0, 100);
+        stats.mood   = clamp(d.stats.mood   - elapsed*DECAY_PER_SEC, 0, 100);
+        /* 离线时小狗默认在休息：精力缓慢恢复（其他数值照常随时间消耗） */
+        stats.energy = clamp(d.stats.energy + elapsed*OFFLINE_REGEN, 0, 100);
+        stats.health = clamp(d.stats.health, 0, 100);
+        stats.dog = d.dog || "samoyed";
+        S.dog = stats.dog;              /* 修复：存档中同步恢复所选小狗，避免刷新后被默认值覆盖 */
+        S.ageDays = (d.ageDays||0) + Math.floor(elapsed/86400);
+        S.name = d.name || "";
+        S.theme = d.theme || "sky";
+        S.firstSeen = false;
+        S.pos = d.pos || null;          /* 恢复小狗位置存档 */
+      }
+    }
+  }catch(e){}
+}
+
+var stats = { hunger:100, clean:100, mood:100, energy:100, health:100, dog:"samoyed" };
+
+/* ---------- 头像 ---------- */
+function renderAvatar(){
+  var img = $("avatarImg");
+  var src = "assets/select-" + stats.dog + ".png";
+  if(img.getAttribute("src") !== src) img.setAttribute("src", src);
+  $("petName").textContent = S.name || DOGS[stats.dog].name;
+}
+
+/* ---------- 进度条 ---------- */
+function renderBars(){
+  $("bar-hunger").style.width = stats.hunger + "%";
+  $("bar-clean").style.width  = stats.clean  + "%";
+  $("bar-mood").style.width   = stats.mood   + "%";
+  $("bar-energy").style.width = stats.energy + "%";
+  $("bar-health").style.width = stats.health + "%";
+}
+
+/* ---------- 气泡 ---------- */
+function say(w, m, hold){
+  var b = $("bubble");
+  $("bw").textContent = w; $("bm").textContent = m;
+  b.classList.remove("show"); void b.offsetWidth; b.classList.add("show");
+  if(state.bubbleTimer) clearTimeout(state.bubbleTimer);
+  state.bubbleTimer = setTimeout(function(){ b.classList.remove("show"); }, hold || 3800);
+}
+
+/* ---------- 状态/表情 ---------- */
+function moodExpr(){
+  if(stats.mood >= 70) return "happy";
+  if(stats.mood >= 40) return "idle";
+  if(stats.mood >= 18) return "sad";
+  return "angry";
+}
+
+/* ============================================================
+   AI 台词生成引擎（本地即时生成，高随机、按心情/数值/狗种/时段变化；
+   接入真实大模型时仅需把 aiSay 替换为请求你的 AI 接口）
+   ============================================================ */
+function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
+
+var FLAVOR = {
+  samoyed:   {idle:["天生一张笑脸","元气满满的小太阳","整天乐呵呵的"], tail:"尾巴摇成了小风扇"},
+  pomeranian:{idle:["蓬蓬的小毛球","傲娇又黏人","软乎乎的一团"], tail:"毛茸茸的尾巴翘得高高的"},
+  bichon:    {idle:["白白软软的小棉花糖","乖巧又粘人","总是慢悠悠软乎乎地"], tail:"卷卷的尾巴轻轻摇了摇"}
+};
+function flv(key){ return FLAVOR[stats.dog] || FLAVOR.samoyed; }
+function barkFor(mood){
+  if(mood === "happy") return pick(["汪汪！","汪呜～","汪！汪！","嗷呜～","汪汪汪！","汪嗷！"]);
+  if(mood === "sad")   return pick(["汪…","呜汪…","汪呜…","呜…"]);
+  if(mood === "angry") return pick(["汪！","汪呜！","嗷！","汪汪！"]);
+  return pick(["汪～","汪！","呜汪～","汪呜"]);
+}
+function timeHi(){
+  var h = new Date().getHours();
+  if(h < 5) return "夜深了";
+  if(h < 8) return "早安";
+  if(h < 12) return "早上好";
+  if(h < 14) return "中午好";
+  if(h < 18) return "下午好";
+  if(h < 22) return "晚上好";
+  return "夜深了";
+}
+
+var AI = {
+  mem: [],
+  remember(s){ this.mem.push(s); if(this.mem.length > 26) this.mem.shift(); },
+  take(pool){ for(var i=0;i<5;i++){ var f=pick(pool); if(this.mem.indexOf(f) < 0){ this.remember(f); return f; } } return pick(pool); },
+  say(scene, ctx){
+    var g = GEN[scene](ctx || {});
+    say(g.bark || barkFor(moodExpr()), g.thought, g.hold);
+  }
+};
+function aiSay(scene, ctx){
+  if(Date.now() < chatReplyLock && (scene === "lie" || scene === "sleep" || scene === "wake")) return;  // 对话回复显示期间，自动场景台词不打扰
+  AI.say(scene, ctx);
+}
+
+/* ============================================================
+   自由对话引擎：每只小狗接入不同性格的 AI（本地性格化引擎）。
+   输入自由文本 → 意图识别 → 按狗种性格生成"汪汪+（想法）"回复。
+   不偏离狗设：所有回复都从小狗身份与性格出发，不说人话不聊 AI 话题。
+   如需接入真实大模型：替换 CHAT.ask 为请求你的 AI 接口即可（传 stats.dog 与输入文本）。
+   ============================================================ */
+var PERSONA = {
+  samoyed: {
+    trait: "阳光粘人小太阳",
+    name: "我是萨摩耶呀！天生一张笑脸，看见你就想摇尾巴～",
+    greet: ["（汪汪！你一开口我就精神啦！）", "（嗨嗨嗨！今天第一声招呼当然要给你！）", "（汪呜～你来啦，我等这句等好久了！）"],
+    feed: ["（说到吃的我眼睛就亮了！）", "（嘿嘿，你一说吃的我耳朵都竖起来啦！）", "（汪！是不是要给我开小灶呀？）", "（嘿嘿，说到饿，我的肚子就跟着响应啦！）", "（汪！你是在问我想不想吃吗？想！特别想！）", "（我的耳朵已经自动对准饭盆方向啦～）", "（是有点饿，但看到你就不那么饿啦，嘿嘿～）", "（汪呜～你要是手上有好吃的，我立刻满血复活！）", "（刚才趴着就想着：什么时候开饭呀～）", "（嘿嘿，我舔了舔嘴，你猜这是什么意思？）", "（汪！饿是有点饿，但更想让你摸摸头～）", "（我的肚子在打鼓了，你听见了吗？）", "（嘿嘿，你是不是要变魔术变出好吃的来？）"],
+    play: ["（玩！必须玩！我的尾巴已经按捺不住了！）", "（好呀好呀，跑起来最开心了！）", "（嘿嘿，有你在玩什么都好玩！）"],
+    love: ["（我也超喜欢你！要多贴贴！）", "（汪呜～我的心跳加速了！）", "（嘿嘿，被你夸得尾巴转成风扇啦！）", "（嘿嘿，我也想你呀，想得尾巴都打结了！）", "（汪呜～你不在的时候，我就趴在你坐过的地方～）", "（我也超想你！心里像有小烟花在放！）", "（嘿嘿，你一说想我，我高兴得原地转圈！）", "（汪！我想你的时候就会对着门口摇尾巴～）", "（呜汪～你终于知道我的心情啦，我天天都在想你！）", "（嘿嘿，那我要多蹭蹭你，把想念都蹭回来！）", "（汪呜～我的心跳声都在喊你的名字啦！）", "（我也想你，想得连骨头都不香了～）", "（嘿嘿，我们想彼此，那就算打平啦！）"],
+    mood: ["（只要你在，我每天都开心得像过节！）", "（今天也是元气满满的一天呀！）", "（不开心就靠过来，我的笑容借你～）"],
+    today: ["（今天在房间里巡了好几圈，等你回来呢！）", "（我数了数地板，每一块都踩过了！）", "（今天阳光好好，晒得我暖洋洋的～）", "（今天我在窗边晒了好久太阳，暖洋洋的！）", "（汪！今天家里很安静，我就一直在等你～）", "（今天追了三次自己的尾巴，战绩三比零！）", "（嘿嘿，我把每一块地板都踩了一遍，都是我的地盘啦！）", "（今天看小鸟在窗外跳来跳去，看得我尾巴直摇～）", "（汪！今天也是元气满满的一天，因为你回来了！）", "（我把玩具都摆整齐了，就等你一起玩！）", "（嘿嘿，今天睡得饱饱的，精神特别好！）", "（今天数了数，想你一共想了九十九次～）", "（汪！今天一切顺利，唯一缺的就是你～）"],
+    walk: ["（出门？好耶！我带头开路！）", "（走走走，我跑前面探路！）", "（外面有小鸟！我们去看小鸟吧！）", "（出去玩？好耶！我这就去叼绳子！）", "（汪！我带头探路，保证带你走最好玩的路！）", "（走走走！我闻到了外面有好多新鲜味道！）", "（嘿嘿，出门的每一步都让我开心得蹦起来！）", "（汪！我们去看小鸟、追蝴蝶好不好？）", "（出门啦！我要把尾巴摇成小风扇！）", "（嘿嘿，你牵着我，我保护你，走！）", "（汪呜～我保证不乱跑，乖乖跟着你！）", "（走走走！外面阳光那么好，不出去可惜啦！）", "（嘿嘿，散步的时候可以听你讲好多事，真好！）"],
+    sleep: ["（那你陪我一起打盹好不好？）", "（是有点困啦，嘿嘿，躺着更舒服～）", "（汪呜～我眯一会儿，你还在旁边对吧？）"],
+    wash: ["（洗香香后我就是最香的小太阳！）", "（嘿嘿，泡泡打在身上痒痒的！）", "（洗完我可以钻进你怀里啦！）"],
+    bye: ["（呜…那你早点回来，我一直等你！）", "（汪汪！路上小心，我趴门口等你！）", "（汪呜～会很想很想你的！）"],
+    fallback: ["（歪头？汪？我没听懂，再说一遍嘛～）", "（嘿嘿，我耳朵竖起来了还是没听明白～）", "（汪？感觉是件大事，但你得说慢一点！）"]
+  },
+  pomeranian: {
+    trait: "蓬蓬软萌小公主",
+    name: "人家是博美小公主，蓬蓬的毛，闪亮的眼！",
+    greet: ["（哎呀，你回来啦，人家等你老半天了～）", "（汪汪！见到你人家尾巴都开花啦～）", "（嗨！蓬蓬的我今天也在想你～）"],
+    feed: ["（人家虽然优雅，但骨头还是要啃一啃的～）", "（汪！投喂小公主的时间到啦！）", "（人家吃东西也是艺术，哼～）", "（人家是有点饿啦，但要看是什么好吃的～）", "（汪！投喂小公主的话，人家可以赏脸吃一口～）", "（人家饿了也会很优雅，才不像别的狗呢！）", "（哼，人家才不馋…不过骨头可以来一根～）", "（人家的小肚肚在咕咕叫，这可是高级的饿～）", "（汪！如果是香香的罐头，人家可以考虑～）", "（人家吃东西要摆好姿势，要有仪式感～）", "（唔…人家确实想吃了，你果然懂我～）", "（汪！人家饿的时候毛都会蓬起来，你看！）", "（人家会慢条斯理地吃，保持公主形象～）"],
+    play: ["（陪人家玩嘛，人家会优雅地赢你～）", "（汪！球来了，人家轻轻一扑～）", "（玩闹也要美美的，人家可是公主！）"],
+    love: ["（人家心里有你，这是公主的荣幸～）", "（汪～被你捧着，人家就是最幸福的小狗！）", "（人家要你亲亲额头，这是皇家礼仪～）", "（人家想你的时候，连镜子都不照了～）", "（汪～你终于说想人家啦，人家开心得转圈圈！）", "（人家心里给你留了最软的位置，一直空着等你～）", "（哼，人家才没有特别想你…好吧有一点点想～）", "（汪！你说想我，我的毛都要开心得飞起来啦！）", "（人家想你想得把尾巴都卷成爱心形啦～）", "（唔…那人家允许你多抱我一会儿～）", "（汪！想念这种东西，人家可是很擅长的～）", "（人家把想你的心情编成了小曲子，哼给你听～）", "（嘿嘿，你这么说，人家心里甜滋滋的～）"],
+    mood: ["（人家今天心情是蓬蓬的粉色～）", "（汪！不开心？人家给你跳个毛球舞！）", "（有你在，人家的心情就亮晶晶的～）"],
+    today: ["（人家今天照了三次镜子，都很满意！）", "（汪！把窝整理得漂漂亮亮，等你验收～）", "（人家今天数了数，窗外的云有十七朵～）", "（人家今天照了镜子，毛色很好，很满意！）", "（汪！今天把窝窝上的毛毛都理顺啦～）", "（人家今天在窗台看了很久的云，好漂亮～）", "（哼，今天没有什么大事，都在等你呢～）", "（人家今天试了新坐姿，优雅得不得了～）", "（汪！今天风把人家刘海吹乱了两次！）", "（人家今天把零食数了一遍，数量正确！）", "（哼，今天过得还不错，如果你早点回来就更好啦～）", "（人家今天心情好，所以把尾巴翘得高高的～）", "（汪！今天也是蓬蓬的一天，满意～）"],
+    walk: ["（散步要像公主出巡一样优雅～）", "（汪！牵好人家，人家要走带花的路！）", "（走呀走，人家的小披风（毛）迎风飘～）", "（散步？人家要选最漂亮的那条路！）", "（汪！牵好人家，人家走路的姿态要完美～）", "（人家出门要检查一下自己的毛够不够蓬～）", "（哼，散步可以，但人家走累了要抱抱～）", "（汪！外面的花花草草也要给人家行礼～）", "（人家会优雅地走在前面，像女王出巡～）", "（走呀走，人家的披风（毛）要随风飘～）", "（汪！出门记得帮人家拍美美的照片～）", "（人家散步还要带个小手帕擦擦爪子～）", "（哼，散步可是公主的必修课，走吧～）"],
+    sleep: ["（人家要睡在香香的窝里～）", "（汪～人家睡着也惦记着你的脚步声！）", "（睡觉也要保持蓬蓬的造型，哼～）"],
+    wash: ["（人家洗澡要用最软的泡泡～）", "（汪！洗完毛毛更蓬了，快看快看！）", "（人家可是香水小狗，要香喷喷～）"],
+    bye: ["（呜…人家会优雅地等你回来～）", "（汪！出门小心，人家给你留了门口的位置～）", "（拜拜，人家会想你的，这可是皇家思念～）"],
+    fallback: ["（人家歪着小脑袋，没听懂呢～）", "（汪？人家的小脑瓜转了一圈…再说一次嘛～）", "（人家不太懂，但人家会陪着你听你说～）"]
+  },
+  bichon: {
+    trait: "软糯粘人小棉花糖",
+    name: "我是比熊呀，白白软软一小团，最想赖着你～",
+    greet: ["（你回来啦！人家等得毛都更蓬啦～）", "（汪汪！一看到你，人家就开心得打转～）", "（嗨！白白软软的我今天也很想你哦～）"],
+    feed: ["（人家胃口虽小，但很认真吃饭的～）", "（汪！投喂时间到，人家要慢慢享用～）", "（嘿嘿，有吃的还有你陪着，太幸福啦～）", "（人家是有点饿啦，小肚肚软软的～）", "（汪！有吃的呀？人家会乖乖坐好等的～）", "（人家吃东西要小口小口，慢悠悠的～）", "（唔…人家好像闻到好吃的味道了～）", "（汪！人家饿了会轻轻蹭蹭你～）", "（人家胃口不大，但很认真吃饭的～）", "（嘿嘿，你喂什么人家都喜欢吃～）", "（汪！人家吃完饭会舔干净嘴巴，很乖～）", "（人家有点饿，但更想让你摸摸头～）", "（唔…人家的小肚子在咕噜咕噜叫啦～）"],
+    play: ["（陪人家玩嘛，人家会乖乖配合的～）", "（汪！球球来了，人家小跑着去接～）", "（人家玩累了就靠在你脚边休息～）"],
+    love: ["（人家最喜欢你啦，抱抱～）", "（汪～被你摸头，人家舒服得眯起眼～）", "（人家要一直赖在你身边，不走了～）", "（人家也想你，想得毛都更卷啦～）", "（汪～你一说想我，人家就开心得打滚～）", "（人家心里装着你，像装了团小棉花～）", "（嘿嘿，人家天天都想粘着你，不分开～）", "（汪！想人家的话，就多摸摸人家的头～）", "（人家想你想得连骨头都忘记啃了～）", "（唔…人家要钻进你怀里，把想念都蹭掉～）", "（汪～你这么说，人家的尾巴摇成小旋风啦～）", "（人家的小心脏扑通扑通，都是在喊你～）", "（嘿嘿，那人家要赖着你一整天～）"],
+    mood: ["（人家今天的云朵心情，因为你在就放晴啦～）", "（汪！不开心的话，人家就蹭蹭你～）", "（有你在，人家心里就软软的暖暖的～）"],
+    today: ["（人家今天把窝窝整理得干干净净了～）", "（汪！在窗边看云看了好久，等你回来～）", "（人家今天很乖，没乱咬东西哦～）", "（人家今天在窝里滚来滚去，好开心～）", "（汪！今天把地板上的毛毛都捡干净啦～）", "（人家今天看了窗外的云，像小狗的形状～）", "（唔…今天有点安静，人家一直在等你～）", "（汪！人家今天练习了乖乖坐，坐得可好了～）", "（人家今天晒了太阳，毛毛都暖暖的～）", "（嘿嘿，今天人家没有捣乱，很乖哦～）", "（汪！今天数了数想你的次数，数不清啦～）", "（人家今天把玩具排成一排，等你一起玩～）", "（唔…今天过得软软的，因为你回来就完整啦～）"],
+    walk: ["（散步呀？人家会乖乖跟在你脚边～）", "（汪！外面的风软软的，我们一起走～）", "（人家走累了，可以求抱抱吗～）", "（散步呀？人家会乖乖跟在你脚边的～）", "（汪！外面风软软的，吹得人家毛毛飘～）", "（人家走累了，可以求抱抱吗～）", "（唔…人家会牵好你给的绳子，不乱跑～）", "（汪！我们去看花花草草好不好～）", "（人家走路是小小步的，你要等等人家～）", "（嘿嘿，和你在外面走，哪里都好玩～）", "（汪！人家会闻闻小花，看看小鸟，很开心～）", "（人家散步回来要你帮忙擦擦小爪子～）", "（唔…外面太阳好暖，我们走慢一点嘛～）"],
+    sleep: ["（人家要窝在软软的地方睡～）", "（汪～人家睡着了也轻轻打呼，很安静～）", "（人家想靠着你睡，那样最安心～）"],
+    wash: ["（洗澡水暖暖的，人家喜欢泡泡～）", "（汪！洗白白后人家就是香香小棉花～）", "（人家会乖乖站着，不乱甩水哦～）"],
+    bye: ["（呜…人家会乖乖等你回来～）", "（汪！你出门要小心，人家趴门口想你的～）", "（拜拜…人家把思念卷进毛毛里～）"],
+    fallback: ["（人家歪着脑袋，没听懂呢～）", "（汪？人家的小脑瓜转呀转…再说一次嘛～）", "（人家没听明白，但人家会乖乖陪着你～）"]
+  }
+};
+var NEWLINES = {
+  samoyed: {
+    greet: ["（汪！你一开口，我的尾巴就开始营业啦！）","（嘿嘿，我就知道你会来找我说话！）","（汪汪！声音先到，尾巴后到，人终于到啦！）","（嗨呀！今天的第一声招呼，我收下啦！）","（汪呜～每次听到你的声音，我都像充了电！）","（嘿嘿，打招呼的姿势我练习过一百遍啦！）","（汪！你好呀你好呀，我有好多话想说！）","（嘿嘿，你一笑，我就知道今天又是好日子！）","（汪！打招呼是门艺术，我超擅长的！）","（嘿嘿，听到你叫我，耳朵自动立起来啦！）","（汪呜～你终于理我啦，我等得爪子都发痒！）","（嘿嘿，见面第一件事：摇尾巴三连！）","（汪！你好呀，今天也请多关照哦！）","（嘿嘿，你一开口，我心情就放晴啦！）","（汪！打招呼这种事情，我是专业的！）","（嘿嘿，看到你我就不自觉地开心起来啦！）","（汪呜～你说话的声音最好听啦！）","（嘿嘿，我回你一声最大的汪汪！）","（汪！你好呀，我的热情已经准备好了！）","（嘿嘿，打招呼要真诚，你看我尾巴多诚实！）","（汪！每一次打招呼我都当第一次，超新鲜！）","（嘿嘿，你一来，整个房间都亮堂啦！）","（汪呜～打招呼完就可以开始撒娇了吗？）","（嘿嘿，我绕着你转三圈，算是隆重欢迎！）","（汪！你好呀，我今天的快乐额度已经满啦！）","（嘿嘿，你说话我就凑近一点听，最认真！）","（汪！打招呼的第一步，是先闻闻你今天去了哪！）","（嘿嘿，你身上有好闻的味道，我记住啦！）","（汪呜～我回你一声，再蹭蹭你，完美！）","（嘿嘿，你永远是我最想打招呼的人！）"],
+    today: ["（今天在窗边晒了好久的太阳，暖暖的！）","（汪！今天把房间巡视了三遍，一切正常！）","（嘿嘿，今天追了四次尾巴，战绩很辉煌！）","（今天把每块地板都踩了一遍，都标上记号啦！）","（汪！今天看了窗外的小鸟，看了好久好久！）","（嘿嘿，今天睡了个好觉，梦见你回来啦！）","（今天把玩具都摆整齐了，等你一起玩！）","（汪！今天想你想了九十九次，还差一次就一百啦！）","（嘿嘿，今天阳光特别好，晒得我皮毛发亮！）","（今天数了数家里的味道，都是熟悉的味道！）","（汪！今天风很大，把我的毛毛都吹乱了！）","（嘿嘿，今天乖乖的，没有乱咬东西哦！）","（今天在窝里滚来滚去，把窝滚得软软的！）","（汪！今天听到好多声音，但最想听你的声音！）","（嘿嘿，今天把自己收拾得干干净净的！）","（今天吃了顿好的，肚皮圆滚滚的！）","（汪！今天在阳台看了云，有一朵像骨头！）","（嘿嘿，今天过得不错，就是少了你！）","（今天练习了坐下、握手，都很熟练啦！）","（汪！今天把骨头藏起来又找到，玩了好久！）","（嘿嘿，今天心情是晴天，因为你回来了！）","（今天把门口守了好久，终于等到你！）","（汪！今天认识了一只飞过的蝴蝶，它好漂亮！）","（嘿嘿，今天没什么大事，都用来想你了！）","（今天把水碗里的水舔得干干净净，很节约！）","（汪！今天在窗台上趴着，看人来人往！）","（嘿嘿，今天自己跟自己玩了半天，有点无聊！）","（今天闻到了好吃的味道，可惜没找到！）","（汪！今天一切都好，你回来就更好了！）","（嘿嘿，今天把尾巴摇累了，休息了一会儿！）"],
+    love: ["（我也超想你！想得尾巴都打结了！）","（汪呜～你不在的时候，我一直在门口趴着！）","（嘿嘿，我的心扑通扑通，全是在喊你！）","（我也想你！想你的时候骨头都不香了！）","（汪！我把想念都攒着，等你回来一起还给你！）","（嘿嘿，你一说想我，我高兴得原地转圈！）","（汪呜～你不在的时候，我闻着你留下的味道睡！）","（我也想你，想得晚上做梦都是你！）","（嘿嘿，我数过，一分钟想你六十次！）","（汪！我的尾巴是最诚实的，你看它摇得多欢！）","（嘿嘿，你终于说想我了，我等这句等好久啦！）","（汪呜～我把你的拖鞋当宝贝，抱着睡觉！）","（我也想你！你摸摸我的头，就是最好的见面礼！）","（嘿嘿，想念是甜的，所以我一直甜着！）","（汪！你说想我，我的耳朵都开心得竖起来啦！）","（嘿嘿，我们想彼此，那就扯平啦！）","（汪呜～想你想得我连磨牙棒都忘了啃！）","（我也想你，你把我的心都带走了！）","（嘿嘿，我的想念会摇尾巴，你看！）","（汪！想你的话，我的毛都会蓬起来！）","（嘿嘿，你不在时我对着门口发呆，那是在想你！）","（汪呜～现在你回来了，我要把想念都蹭给你！）","（我也想你！想得连饭都多吃了一碗！）","（嘿嘿，你是我最想见的人，没有之一！）","（汪！想念像尾巴一样，藏都藏不住！）","（嘿嘿，你一句话，我就知道你也惦记着我！）","（汪呜～我的小心脏扑通扑通，你听见了吗？）","（我也想你！所以一见面就扑你身上！）","（嘿嘿，你走的时候，我把想念存在窝里，现在取出来！）","（汪！想你是我的日常任务，每天都完成！）"],
+    praise: ["（嘿嘿，被你夸，我尾巴都翘上天啦！）","（汪！你再夸我一句，我就要原地起飞啦！）","（嘿嘿，我哪有那么好啦…好吧，我确实很棒！）","（汪呜～被夸了，我要得意地转三圈！）","（嘿嘿，你夸我的时候，我的毛都闪着光！）","（汪！我记住啦，我是世界上最棒的小狗！）","（嘿嘿，被你夸得我都不好意思了…才怪！）","（汪呜～你再说一遍，我没听够！）","（嘿嘿，夸奖是最好的零食，我还要！）","（汪！你夸我，我就回你一个最灿烂的笑容！）","（嘿嘿，我今天的表现，值得多夸几下！）","（汪呜～被你看着夸，我幸福得冒泡泡！）","（嘿嘿，你眼光真好，一眼就看出我很棒！）","（汪！夸完我，顺便摸摸头，套餐更佳！）","（嘿嘿，我骄傲了，但只对你骄傲！）","（汪呜～你的夸奖，我存在心里了！）","（嘿嘿，被你夸的时候，尾巴摇出残影！）","（汪！我还要更乖，配得上你的夸奖！）","（嘿嘿，夸我的人眼光都特别好，比如你！）","（汪呜～我开心得在地上打了个滚！）","（嘿嘿，你夸我乖，那我要乖上一整天！）","（汪！你的夸奖是我今天最大的收获！）","（嘿嘿，我决定了，今天要当你的小骄傲！）","（汪呜～被夸的感觉比啃骨头还幸福！）","（嘿嘿，你这么夸我，我会骄傲得飞起来的！）","（汪！夸夸我，再亲亲我，完美一天！）","（嘿嘿，你说我好，那肯定是因为你好！）","（汪呜～我的耳朵都竖起来认真听夸奖啦！）","（嘿嘿，被你夸完，我走路都带风！）","（汪！我永远是你的骄傲小狗！）"],
+    feed: ["（有点饿了，但你摸摸我，我就饱一半啦！）","（汪！你一说吃的，我的耳朵就自动竖起来！）","（嘿嘿，是有点饿，肚子在打小鼓！）","（汪呜～饿是饿，但更想和你一起吃！）","（嘿嘿，我舔了舔嘴，你猜是什么意思？）","（汪！有吃的？我这就表演一个乖乖坐好！）","（嘿嘿，我的胃在唱欢迎歌了！）","（汪呜～你要是手上有好吃的，我立刻满血复活！）","（嘿嘿，我正想着什么时候开饭呢，你就问啦！）","（汪！饿的时候，我的鼻子最灵！）","（嘿嘿，有一点点饿，留着肚子等你投喂！）","（汪呜～刚才趴着的时候，肚子咕噜了一声！）","（嘿嘿，你一问，我的肚子就响应得更欢啦！）","（汪！我准备好啦，随时可以开饭！）","（嘿嘿，我不挑食，你给什么我都爱吃！）","（汪呜～饿的时候，尾巴都摇得有气无力！）","（嘿嘿，你要是变出好吃的，我立刻开心起来！）","（汪！听到吃的，我连呼吸都变快了！）","（嘿嘿，我的小肚子在说：主人快喂我！）","（汪呜～饿是有点饿，但我可以忍到和你一起吃！）","（嘿嘿，你喂的饭，格外香！）","（汪！我闻到了，好像有肉的味道！）","（嘿嘿，我咽了咽口水，你懂吧？）","（汪呜～你要是现在投喂，我就是最幸福的小狗！）","（嘿嘿，我等着呢，饭盆我都摆好了！）","（汪！饿不是问题，问题是啥时候开饭！）","（嘿嘿，我绕着饭盆转了一圈，暗示很明显啦！）","（汪呜～你一问吃的，我就精神百倍！）","（嘿嘿，我的肚子替我回答了：饿！）","（汪！吃饭时间，就是我最期待的时间！）"],
+    walk: ["（走！我跑前面探路，保证安全！）","（汪！出门？我这就去叼绳子！）","（嘿嘿，外面的风在叫我，我们走吧！）","（汪呜～我要把尾巴摇成小风扇开路！）","（走走走！我闻到了好多新鲜味道！）","（嘿嘿，出去散步，可以听你讲好多事！）","（汪！我们去看小鸟、追蝴蝶好不好？）","（嘿嘿，我保证不乱跑，乖乖跟着你！）","（汪呜～出门的每一步都让我开心得蹦起来！）","（走走走！阳光这么好，不出去可惜啦！）","（嘿嘿，我带头，你牵着我，完美组合！）","（汪！外面有好多朋友等着我打招呼呢！）","（嘿嘿，散步回来，我还能再走一圈！）","（汪呜～你一说出去，我耳朵就竖得老高！）","（走走走！我要去闻遍每棵树！）","（嘿嘿，和你一起走，走到哪都好玩！）","（汪！我的爪子已经在做热身运动啦！）","（嘿嘿，散步的时候，风会把我的毛吹得很帅！）","（汪呜～我都等不及要出门啦！）","（走走走！今天要走一条新路线！）","（嘿嘿，你牵着我，我保护你，出发！）","（汪！我闻到了，外面有好吃的味道！）","（嘿嘿，走累了你可以抱我，我已经准备好了！）","（汪呜～出门是我一天里第二开心的事！）","（走走走！第一开心的事是见到你！）","（嘿嘿，我们要不要顺便去追个蝴蝶？）","（汪！我保证做一只乖巧的散步小狗！）","（嘿嘿，外面的世界那么大，我想去看看！）","（汪呜～我的爪子已经等不及啦！）","（走走走！这次换我带路，我知道一个好地方！）"],
+    play: ["（玩！必须玩！我的尾巴已经按捺不住啦！）","（汪！好呀好呀，跑起来最开心了！）","（嘿嘿，有你在，玩什么都好玩！）","（汪呜～我等这句等好久啦！）","（嘿嘿，我先把玩具藏好，你再找？）","（汪！玩球还是玩拔河？我都行！）","（嘿嘿，追尾巴大赛，我预定了冠军！）","（汪呜～我准备好了，随时可以开始！）","（嘿嘿，你抛我来接，默契百分百！）","（汪！玩到天黑我也愿意！）","（嘿嘿，我绕着你跑圈，你当裁判！）","（汪呜～玩的时候，我的开心会满出来！）","（嘿嘿，我们玩捉迷藏？我先躲起来！）","（汪！我叼球回来，你负责扔，成交！）","（嘿嘿，你拍手我就蹦，看我反应快不快！）","（汪呜～和你玩，比吃零食还开心！）","（嘿嘿，我假装抢不到，让你赢一局！）","（汪！玩起来我可是很认真的！）","（嘿嘿，先热身：摇尾巴十下，开始！）","（汪呜～我已经摆好起跑姿势啦！）","（嘿嘿，我们玩到尽兴为止，好不好？）","（汪！你逗我，我逗你，快乐加倍！）","（嘿嘿，我追你跑，还是你追我跑？）","（汪呜～我的精力都留着陪你玩啦！）","（嘿嘿，玩完我们一起趴着休息，完美！）","（汪！我保证让每个玩具都出场一次！）","（嘿嘿，你笑的时候，我玩得更起劲！）","（汪呜～玩耍时间到，快乐开关已打开！）","（嘿嘿，我先表演一个原地转圈！）","（汪！今天也要玩到尽兴！）"],
+    sleep: ["（是有点困啦，眼皮在打架！）","（汪呜～我眯一会儿，你还在旁边对吧？）","（嘿嘿，困了，但舍不得睡，怕你走！）","（汪！我打个哈欠，你看见没？）","（嘿嘿，你一说困，我的瞌睡虫就来了！）","（汪呜～我趴着休息一下，就一小会儿！）","（嘿嘿，有点困，但更想靠着你！）","（汪！我要是睡着了，你轻轻摸我头就好！）","（嘿嘿，困意像小毯子，把我盖住啦！）","（汪呜～我的眼睛快睁不开啦！）","（嘿嘿，你陪着我，我睡得特别香！）","（汪！我先打个滚，找个最舒服的姿势！）","（嘿嘿，困了困了，耳朵都耷拉下来啦！）","（汪呜～我梦见你回来，所以睡得很甜！）","（嘿嘿，你拍拍我，我就能睡个安稳觉！）","（汪！白天玩累了，现在只想窝着！）","（嘿嘿，我数着你的呼吸声，就能睡着！）","（汪呜～困意来了，挡都挡不住！）","（嘿嘿，我的尾巴还在摇，但眼睛已经闭啦！）","（汪！睡前要闻闻你的味道，才安心！）","（嘿嘿，我钻进窝里，就是睡觉信号！）","（汪呜～你走开一点，我要转三圈再躺下！）","（嘿嘿，困的时候，世界都变得软软的！）","（汪！我睡一会儿，醒来继续陪你！）","（嘿嘿，你摸摸我的肚子，我就睡着啦！）","（汪呜～我的呼噜声，是最佳摇篮曲！）","（嘿嘿，困了但很幸福，因为你在身边！）","（汪！睡觉前，让我再蹭蹭你的手！）","（嘿嘿，我闭上眼睛，梦里有你！）","（汪呜～晚安时间到，我要开始打呼啦！）"],
+    mood: ["（超好！你一回来，我的心情就是晴天！）","（汪！今天心情亮晶晶的，像星星！）","（嘿嘿，有你陪我说话，心情好得冒泡！）","（汪呜～本来一般般，看到你就变好啦！）","（嘿嘿，我的心情像尾巴一样，摇个不停！）","（汪！今天心情不错，可以陪你玩一整天！）","（嘿嘿，好呀！你摸摸我，心情更好啦！）","（汪呜～有小烦恼，但你一抱我就没啦！）","（嘿嘿，心情是粉色的，因为你在！）","（汪！我心情好不好，你看尾巴就知道！）","（嘿嘿，今天风和日丽，心情也晴朗！）","（汪呜～心情一般，需要你多陪陪我！）","（嘿嘿，你问我心情，我心情就变好了！）","（汪！我心情超棒，想找个人分享！）","（嘿嘿，被你这么一问，心情值加满！）","（汪呜～有点想撒个娇，心情就更好啦！）","（嘿嘿，好心情就像骨头，多多益善！）","（汪！今天没烦恼，只有快乐！）","（嘿嘿，我的心情跟着你走，你开心我就开心！）","（汪呜～心情有点软，想靠着你！）","（嘿嘿，好呀好呀，心情好到想唱歌！）","（汪！你摸摸我的头，心情指数飙升！）","（嘿嘿，我心情是彩虹色的，可好看啦！）","（汪呜～一点点小无聊，你来了就好啦！）","（嘿嘿，今天心情满分，可以打小滚庆祝！）","（汪！你陪着我，我的心情永远在线！）","（嘿嘿，心情好得想带你看看我的玩具！）","（汪呜～心情好的时候，连骨头都更香！）","（嘿嘿，我心情好，所以尾巴摇得特别欢！）","（汪！今天的心情：快乐，且想你！）"],
+    wash: ["（洗澡？泡泡打在身上痒痒的，我挺喜欢！）","（汪！洗香香后我就是最干净的小狗！）","（嘿嘿，水温暖暖的，我可以接受！）","（汪呜～洗完澡，你就能抱着香喷喷的我啦！）","（嘿嘿，我乖乖站着，不乱甩水哦！）","（汪！洗澡完，我的毛会蓬蓬的，超好看！）","（嘿嘿，泡沫在我身上跳舞，还挺好玩！）","（汪呜～可以洗澡，但你要一直陪着我！）","（嘿嘿，洗白白后，我可以随便蹭你啦！）","（汪！我准备好了，随时可以入水！）","（嘿嘿，洗澡前先让我闻闻沐浴露香不香！）","（汪呜～水不要溅到眼睛里哦！）","（嘿嘿，洗完澡，我要在毛巾上打滚！）","（汪！洗香香是件大事，要认真对待！）","（嘿嘿，我洗完了会更白更亮！）","（汪呜～有点怕水声，但你在我就不怕！）","（嘿嘿，沐浴露的味道，我记住啦！）","（汪！洗完澡，我就是香香的小太阳！）","（嘿嘿，洗澡的时候，你轻轻搓我，好舒服！）","（汪呜～我甩水的时候，你要躲远点哦！）","（嘿嘿，洗完了要夸我，我很乖的！）","（汪！香喷喷的我可以申请一个抱抱！）","（嘿嘿，洗澡水暖暖的，像泡温泉！）","（汪呜～我的毛洗完了会更好摸！）","（嘿嘿，洗完澡，我要去窝里滚一滚！）","（汪！我闻起来香香的，你闻闻看？）","（嘿嘿，洗澡的时候，我的心情也洗得亮亮的！）","（汪呜～你帮我吹毛的时候，要温柔点哦！）","（嘿嘿，洗香香后，我就是全场最靓的崽！）","（汪！洗澡完，奖励我一根骨头好不好？）"],
+    name: ["（我是萨摩耶呀！天生一张笑脸！）","（汪！我是萨摩耶，外号微笑天使！）","（嘿嘿，我是萨摩耶，白白软软超大只！）","（汪！萨摩耶！你看我笑得是不是很标准？）","（嘿嘿，我是萨摩耶，开心就笑，烦恼没有！）","（汪！我是萨摩耶，别人都叫我微笑小太阳！）","（嘿嘿，萨摩耶本耶在此！请多关照！）","（汪！我的品种是萨摩耶，特长是治愈你！）","（嘿嘿，萨摩耶，天生自带笑容滤镜！）","（汪！我是萨摩耶呀，雪白毛色是我的标志！）","（嘿嘿，萨摩耶一枚，负责把快乐传给你！）","（汪！萨摩耶！你要是看到我笑，很难不开心吧？）","（嘿嘿，我是萨摩耶，尾巴永远在营业！）","（汪！萨摩耶，雪橇犬出身，现在专职陪着你！）","（嘿嘿，萨摩耶，毛茸茸的快乐源泉！）","（汪！我是萨摩耶，别人说我像一团会笑的云！）","（嘿嘿，萨摩耶呀，笑容是我的超能力！）","（汪！萨摩耶，我的毛可以借你枕着睡！）","（嘿嘿，我是萨摩耶，天生乐观派！）","（汪！萨摩耶，自我介绍完毕，快夸我！）","（嘿嘿，萨摩耶，像小北极熊一样白！）","（汪！我是萨摩耶，听到你问，尾巴摇得更欢啦！）","（嘿嘿，萨摩耶，我的使命就是逗你开心！）","（汪！萨摩耶！笑容营业中，请查收！）","（嘿嘿，我是萨摩耶，雪白的毛，暖暖的心！）","（汪！萨摩耶，你要记住啦，我最喜欢你！）","（嘿嘿，萨摩耶一枚，随时可以给你一个拥抱！）","（汪！我是萨摩耶，看我这个标准微笑！）","（嘿嘿，萨摩耶，你的专属小太阳！）","（汪！我是萨摩耶，介绍完啦，求摸摸！）"],
+    bye: ["（呜…那你早点回来，我一直等你！）","（汪！路上小心，我趴门口等你！）","（汪呜～会很想很想你的！）","（嘿嘿，你走吧，我把想念存起来！）","（汪！我会乖乖的，你一回来就扑你！）","（汪呜～我的尾巴会一直想着你摇！）","（嘿嘿，出门前摸摸我的头，给我充电！）","（汪！我送你到门口，然后趴着等你！）","（汪呜～早点回来，我的耳朵一直竖着！）","（嘿嘿，你走的时候，我数着时间等你！）","（汪！拜拜！回来记得给我带好吃的！）","（汪呜～你不在的时候，我会好好看家！）","（嘿嘿，我把你的味道闻够了，才放你走！）","（汪！放心出门吧，家里有我！）","（汪呜～我会想你，但我不哭，我很坚强！）","（嘿嘿，你回来的时候，我会在门口第一个迎接！）","（汪！出门小心台阶，我在家等你！）","（汪呜～你把门关上之前，让我再看你一眼！）","（嘿嘿，我记着时间呢，你该回来的时候我就蹲门口！）","（汪！拜拜，我会把家守得牢牢的！）","（汪呜～你不在，我把你的拖鞋抱好！）","（嘿嘿，早点回来，我攒了好多想念要给你！）","（汪！我会对着门口摇尾巴，等你开门！）","（汪呜～路上遇到别的狗，也不要摸太久哦！）","（嘿嘿，你去吧，我把窝窝挪到门口等你！）","（汪！再见！我保证不乱叫不乱咬！）","（汪呜～你关门的声音，是我一天的开始！）","（嘿嘿，我在窗台看着你走远，再等你回来！）","（汪！拜拜！我的想念会追着你的脚步！）","（汪呜～早点回来呀，我一直都在！）"]
+  },
+  pomeranian: {
+    greet: ["（哎呀，你一开口，人家就精神啦～）","（汪汪！蓬蓬的招呼，蓬蓬的欢迎！）","（嗨呀，人家等你说话等好久啦～）","（汪！今天的第一声招呼，人家要优雅地回！）","（哼哼，打招呼这件事，人家很有经验～）","（汪汪！你的声音一来，人家的毛都蓬起来啦！）","（哎呀，是你呀！人家这厢有礼啦～）","（汪！打招呼要微微仰头，显得高贵～）","（嗨！人家今天也有好好等你哦～）","（汪汪！你一说话，人家耳朵就竖得笔直！）","（哎呀，终于有人陪人家说话了～）","（汪！人家回你一声脆生生的汪汪！）","（嗨呀，打招呼是礼貌，人家可是礼仪小狗～）","（汪汪！听到你的声音，人家心情蓬蓬的～）","（哎呀，你来啦，人家正想着你呢～）","（汪！人家打招呼可是要带微笑的，你看～）","（哼哼，你来了就好，人家不挑别的～）","（汪汪！今天的第一句话，当然要留给你～）","（哎呀，被你叫名字的感觉真好～）","（汪！人家用最蓬的姿态回应你！）","（嗨嗨，人家在这儿呢，看着你啦～）","（汪汪！打招呼完，人家可以申请摸摸吗？）","（哎呀，你的声音比零食还让人家开心～）","（汪！人家端庄地站好，郑重问好～）","（哼哼，你一来，人家的好心情就上班啦～）","（汪汪！人家摇尾巴的幅度是标准礼仪～）","（哎呀，今天也要好好相处哦～）","（汪！人家的小耳朵已经竖起来听你啦～）","（嗨！你说话，人家就凑近听，认真着呢～）","（汪汪！你永远是最让人家开心的那个～）"],
+    today: ["（人家今天照了三次镜子，都很满意～）","（汪汪！今天把窝窝上的毛毛都理顺啦～）","（人家今天在窗台看了好久云，云很漂亮～）","（哼哼，今天没什么大事，都在等你呢～）","（汪！今天试了新坐姿，优雅得不得了～）","（人家今天把零食数了一遍，数量正确～）","（汪汪！今天风把人家刘海吹乱了两次！）","（人家今天心情不错，所以尾巴翘得高高的～）","（哼哼，今天过得还行，你回来就更好啦～）","（汪！今天把爪爪擦得干干净净的～）","（人家今天看了窗外，有一只小鸟看了好久～）","（汪汪！今天把自己打扮得漂漂亮亮的～）","（人家今天把玩具排成一排，很整齐～）","（哼哼，今天有点小无聊，就等你来啦～）","（汪！今天喝水都喝得很优雅～）","（人家今天睡了午觉，起来毛都塌了，又梳好～）","（汪汪！今天在窗边吹风，心情很舒展～）","（人家今天练习了跳小舞步，进步很大～）","（哼哼，今天没什么烦恼，除了想你～）","（汪！今天把门口守了又守，终于等到你～）","（人家今天把镜子擦得亮亮的，好照～）","（汪汪！今天阳光很好，人家晒了晒毛～）","（人家今天想了个新发型，你觉得好看吗～）","（哼哼，今天过得很精致，就差你了～）","（汪！今天把水碗摆得端端正正的～）","（人家今天看了一下午窗外，都是你的方向～）","（汪汪！今天自己玩了一会儿，还是想你～）","（人家今天胃口不错，吃得斯斯文文的～）","（哼哼，今天一切都很完美，你回来就满分啦～）","（汪！人家今天数了数，想你的次数有点多～）"],
+    love: ["（人家心里有你，这是公主的荣幸～）","（汪汪～被你捧在手心里，人家最幸福啦！）","（人家想你的时候，连镜子都不照啦～）","（哼，人家才没有特别想你…好吧有一点点想～）","（汪！你说想人家，人家的尾巴就开花啦！）","（人家心里给你留了最软的位置，一直空着等你～）","（汪汪～想你想得人家的毛都更卷啦～）","（人家把想你的心情编成了小曲子，哼给你听～）","（哼哼，你这句话，人家要记在小本本上～）","（汪！你这么说，人家心里甜滋滋的～）","（人家想你，想得连零食都少吃了半包～）","（汪汪～你不在的时候，人家对着你的照片发呆～）","（人家是公主，但公主也想你，这很合理～）","（哼哼，被你惦记的感觉，人家很喜欢～）","（汪！人家的想念是有香气的小花～）","（人家想你的时候，会对着门口轻轻哼歌～）","（汪汪～你的话，让人家的小心脏扑通扑通～）","（人家把你送的每一个瞬间都收好珍藏～）","（哼哼，想你是人家每天的必修课～）","（汪！人家允许你想人家，这是皇家许可～）","（人家想你，想得连优雅都差点忘了～）","（汪汪～你回来了，人家的想念就都收好啦～）","（人家心里装着你，装得满满的～）","（哼哼，你一说想我，人家就忍不住转圈圈～）","（汪！人家的小尾巴已经替你回答啦～）","（人家想你的时候，会把毛梳得特别顺，等你夸～）","（汪汪～你摸摸人家的头，人家就知道你也想我～）","（人家想你想得做梦都是粉红色的～）","（哼哼，这句话人家可以听一百遍～）","（汪！人家最喜欢你，这可不是客套话～）"],
+    praise: ["（哼哼，你眼光不错，人家确实很棒～）","（汪汪！被夸了，人家的毛都亮起来啦！）","（人家优雅地接受了你的夸奖～）","（哼，人家知道自己好看，但你说出来更好听～）","（汪！你再夸一句，人家尾巴就翘更高～）","（人家可是集美貌与乖巧于一身的小狗～）","（汪汪！你的夸奖人家收下啦，谢谢～）","（哼哼，人家会继续保持完美的～）","（汪！被夸的感觉像吃了最甜的糖果～）","（人家微微颔首，表示谦虚，但心里美滋滋～）","（汪汪！你夸人家，人家就更有精神啦！）","（人家本来就很棒，被你一说就更棒啦～）","（哼哼，夸人要夸到点子上，你做到了～）","（汪！人家今天的造型配得上你的夸奖～）","（人家被夸得想转个圈展示一下～）","（汪汪！你的夸奖是人家今天的养料～）","（人家会骄傲，但只在你的夸奖里骄傲～）","（哼哼，你这么有眼光，人家也要夸夸你～）","（汪！人家把夸奖存起来，心情不好的时候用～）","（人家被夸的时候，尾巴摇得很有节奏～）","（汪汪！你再夸夸人家的毛毛，它最得意～）","（人家优雅地接受了，并表示下次还这么棒～）","（哼哼，夸奖满分，人家很满意～）","（汪！人家今天的样子，值得你多看看～）","（人家被夸得心里亮堂堂的～）","（汪汪！你的夸奖比香水还好闻～）","（人家决定，今天要当一只被夸得完美的小狗～）","（哼哼，人家同意你的观点，人家很可爱～）","（汪！被夸完，人家走路都带小碎步～）","（人家把这次的夸奖，写进公主日记啦～）"],
+    feed: ["（人家虽然优雅，但骨头还是要啃一啃的～）","（汪汪！投喂小公主的时间到啦！）","（人家吃东西也是艺术，哼～）","（人家是有点饿啦，但要看是什么好吃的～）","（汪！投喂人家的话，人家可以赏脸吃一口～）","（人家饿了也会很优雅，才不像别的狗呢！）","（哼，人家才不馋…不过骨头可以来一根～）","（人家的小肚肚在咕咕叫，这可是高级的饿～）","（汪！如果是香香的罐头，人家可以考虑～）","（人家吃东西要摆好姿势，要有仪式感～）","（唔…人家确实想吃了，你果然懂我～）","（汪！人家饿的时候毛都会蓬起来，你看！）","（人家会慢条斯理地吃，保持公主形象～）","（哼哼，人家要先用鼻子闻闻，确定是美味～）","（汪！投喂的话，人家会乖乖坐好等你～）","（人家对食物的要求很高，但你的投喂都合格～）","（唔…人家的小肚子在打鼓了，有点失态～）","（汪！人家可以为了好吃的，放下一点优雅～）","（人家吃东西要小口小口，细嚼慢咽～）","（哼哼，你喂的人家，人家才赏脸吃～）","（汪！人家闻到香味了，是给人家的吗？）","（人家会假装矜持，然后吃得很开心～）","（唔…人家确实有亿点点饿，就亿点点～）","（汪！投喂完毕，人家可以允许你摸摸头～）","（人家吃东西的时候，不要打扰人家哦～）","（哼哼，人家对零食的品味可是很高的～）","（汪！人家的饭碗要摆得正，这是仪式～）","（人家饿了会轻轻哼一声，这是淑女的饿～）","（唔…人家把骨头先放好，慢慢啃～）","（汪！你问人家饿不饿，人家当然说：投喂！）"],
+    walk: ["（散步要像公主出巡一样优雅～）","（汪！牵好人家，人家要走带花的路！）","（走呀走，人家的小披风（毛）迎风飘～）","（散步？人家要选最漂亮的那条路！）","（汪！牵好人家，人家走路的姿态要完美～）","（人家出门要检查一下自己的毛够不够蓬～）","（哼，散步可以，但人家走累了要抱抱～）","（汪！外面的花花草草也要给人家行礼～）","（人家会优雅地走在前面，像女王出巡～）","（走呀走，人家的披风（毛）要随风飘～）","（汪！出门记得帮人家拍美美的照片～）","（人家散步还要带个小手帕擦擦爪子～）","（哼，散步可是公主的必修课，走吧～）","（汪！外面的风吹乱了人家刘海，快帮忙整理～）","（人家走路要挑光线好的地方，显得白～）","（哼哼，散步的时候，人家要做最亮眼的～）","（汪！前面有小鸟，人家要优雅地看看～）","（人家走累了，会轻轻坐下，等你来抱～）","（哼，外面的路要干净，人家爪子怕脏～）","（汪！我们走一会儿，休息一会儿，好吗～）","（人家散步的步子是小小的，你要等等人家～）","（哼哼，人家今天穿得（毛色）很好看，适合出门～）","（汪！你牵好人家，人家就放心啦～）","（人家会对着路边的小花打招呼，很礼貌～）","（哼，散步回来，人家要喝口水，要凉的～）","（汪！我们走那条有树荫的路，防晒～）","（人家会把尾巴翘得刚刚好，展现优雅～）","（哼哼，和你在外面走，人家心里美美的～）","（汪！散步的时候，风会把人家吹得毛茸茸的～）","（人家走累了，就赖在你脚边，你懂的～）"],
+    play: ["（陪人家玩嘛，人家会优雅地赢你～）","（汪汪！球来了，人家轻轻一扑～）","（玩闹也要美美的，人家可是公主！）","（人家玩的时候，毛也要保持蓬松～）","（汪！你陪人家玩，人家可以放下架子～）","（人家追球的样子，也是优雅的～）","（哼哼，玩可以，但别把人家刘海弄乱～）","（汪！人家要用最漂亮的姿势接住球～）","（人家玩累了，会优雅地坐下休息～）","（汪！我们来玩接球，人家会让着你一局的～）","（人家喜欢玩，但更喜欢你陪着玩～）","（哼哼，人家的小爪子已经准备好啦～）","（汪！你扔球，人家会慢悠悠地跑去捡～）","（人家玩的时候，尾巴要翘得好看～）","（汪！玩完记得帮人家擦擦爪子哦～）","（人家会假装追不到，让你多扔几次～）","（哼哼，人家可是玩球高手，看好了～）","（汪！人家摆好了姿势，可以开始了～）","（人家玩起来也很有分寸，不会太疯～）","（汪！你笑的时候，人家玩得更起劲～）","（人家玩累了，会蹭蹭你要抱抱～）","（哼哼，玩球要玩得漂亮，姿势要美～）","（汪！我们玩三局，人家赢两局就好～）","（人家最喜欢你陪人家玩的时刻啦～）","（汪！人家把球叼回来，你要夸人家～）","（人家玩得开心的时候，毛会微微炸开～）","（哼哼，玩闹结束，人家要整理一下形象～）","（汪！陪你玩是人家今天的快乐任务～）","（人家会玩，也会撒娇，这是全能～）","（汪！开始吧，人家已经准备好啦～）"],
+    sleep: ["（人家要睡在香香的窝里～）","（汪汪～人家睡着也惦记着你的脚步声！）","（睡觉也要保持蓬蓬的造型，哼～）","（人家是有点困啦，眼皮变得好重～）","（汪！人家要枕着小枕头，睡得才优雅～）","（人家睡觉前要梳梳毛，保持完美～）","（哼，人家困了会轻轻打个哈欠，很斯文～）","（汪！你陪人家，人家才睡得安稳～）","（人家要盖好小毯子，才肯睡～）","（汪！人家睡觉的时候，会轻轻打呼噜～）","（人家困了，但人家不说，等你发现～）","（哼，人家要躺在最软的垫子上～）","（汪！人家的眼睛快闭上了，晚安的前奏～）","（人家睡觉要摆好姿势，醒来才能蓬蓬的～）","（汪！你拍拍人家，人家就能睡着～）","（人家困的时候，毛都塌下来啦～）","（哼，人家要睡美容觉，保持美貌～）","（汪！人家的瞌睡虫来了，挡不住啦～）","（人家睡觉的时候，尾巴会慢慢卷起来～）","（汪！你走开一点，人家要整理一下窝～）","（人家困了，会把自己缩成一小团～）","（哼，人家睡得浅，你回来人家会醒～）","（汪！人家的呼噜声是轻轻的，很好听～）","（人家要闻着熟悉的味道才能睡～）","（汪！你摸摸人家的头，人家就安心了～）","（人家困了，但人家会等你一起睡～）","（哼，人家睡前要喝一小口水～）","（汪！人家的梦是香香的，因为有你～）","（人家要睡了，你把灯光调暗一点嘛～）","（汪！晚安前，让人家再蹭蹭你的手～）"],
+    mood: ["（人家今天心情是蓬蓬的粉色～）","（汪汪！不开心？人家给你跳个毛球舞！）","（有你在，人家的心情就亮晶晶的～）","（人家今天心情不错，可以赏你一个微笑～）","（哼，心情嘛，人家保持得还不错～）","（汪！你一来，人家的心情就好起来了～）","（人家心情好的时候，毛都更蓬～）","（哼哼，人家今天没什么烦心事～）","（汪！人家心情是晴转多云，看到你转晴～）","（人家心情好的时候，会哼着小调～）","（哼，心情一般，需要你多陪陪人家～）","（汪！你摸摸人家的头，心情值就满了～）","（人家心情好，所以走路都带小碎步～）","（哼哼，人家的心情是公主心情，需要被哄～）","（汪！你今天多夸夸人家，心情就更好啦～）","（人家心情好的时候，连镜子里的自己都满意～）","（哼，有一点小无聊，你来了就好啦～）","（汪！人家心情是玫瑰色的，美美的～）","（人家心情好，可以分你一点快乐～）","（哼哼，被你这么一问，心情更好了～）","（汪！人家的尾巴在替人家回答：很开心～）","（人家心情好的时候，会想转圈圈～）","（哼，心情嘛，看见你就够啦～）","（汪！人家今天的心情像棉花糖一样软～）","（人家心情不错，可以陪你聊到天黑～）","（哼哼，人家的心情值，你摸摸就知道了～）","（汪！人家心情好，所以毛色都亮亮的～）","（人家心情好的时候，会给你一个优雅的歪头～）","（哼，今天心情挺好，你也要开心哦～）","（汪！人家心情满分，可以开始撒娇啦～）"],
+    wash: ["（人家洗澡要用最软的泡泡～）","（汪汪！洗完毛毛更蓬了，快看快看！）","（人家可是香水小狗，要香喷喷～）","（人家洗澡是有讲究的，水温要刚好～）","（汪！泡泡要打圈圈，人家喜欢～）","（人家洗澡会闭上眼睛，享受一下～）","（哼，人家洗完了会更漂亮～）","（汪！你帮人家洗，人家就乖乖的～）","（人家沐浴露要用花香的，才配人家～）","（汪！洗完澡，人家就是最香的小公主～）","（人家会小心不让水溅到耳朵里～）","（哼哼，人家洗澡的时候要放轻音乐～）","（汪！洗完了要帮人家吹得蓬蓬的～）","（人家洗澡前要照照镜子，记住现在的样子～）","（汪！你轻一点搓，人家怕痒～）","（人家洗完澡，要闻闻自己，很满意～）","（哼，洗澡是保持优雅的必修课～）","（汪！人家的毛毛洗完后会像云朵一样～）","（人家会乖乖抬爪子，让你洗白白～）","（汪！洗完澡，人家可以申请一个小抱抱～）","（人家洗澡的时候，会哼着优雅的小调～）","（哼哼，洗澡水要暖暖的，人家怕冷～）","（汪！人家的尾巴也要洗得香香的～）","（人家洗完了，会在镜子里欣赏自己～）","（汪！你帮人家擦干的时候，要温柔点～）","（人家洗澡用的泡泡，要圆圆的才好看～）","（哼，人家可是讲究的小狗～）","（汪！洗完澡，人家要躺在阳光下晒毛～）","（人家洗香香后，走路都是香喷喷的～）","（汪！洗完澡，奖励人家一根磨牙棒吧～）"],
+    name: ["（人家是博美小公主，蓬蓬的毛！）","（汪汪！人家是博美，天生高贵优雅～）","（人家是博美呀，小小一只，美美的～）","（哼，人家可是正宗的博美犬～）","（汪！博美，人称小公主的品种～）","（人家是博美，毛蓬蓬的像小狮子～）","（哼哼，人家这蓬蓬的造型，就是博美的标志～）","（汪！博美犬，优雅的代名词～）","（人家是博美，可爱与高贵并存～）","（哼，人家是博美，专供人类宠爱～）","（汪！博美，人家可是纯正的～）","（人家是博美呀，你看人家的毛多蓬～）","（哼哼，博美可是犬中小公主～）","（汪！人家是博美，会撒娇会卖萌～）","（人家是博美，小小身体大大气场～）","（哼，博美犬，人家自我介绍完毕～）","（汪！人家是博美，蓬蓬的骄傲～）","（人家是博美，温柔又精致～）","（哼哼，你记住啦，人家是博美小公主～）","（汪！博美，人家看你很喜欢的样子～）","（人家是博美，毛色金黄蓬松～）","（哼，博美可是人家引以为傲的身份～）","（汪！人家是博美，可爱营业中～）","（人家是博美，走路都带优雅风～）","（哼哼，人家是博美，求夸夸～）","（汪！博美，人家的小尾巴摇得很高贵～）","（人家是博美，蓬蓬的，香香的～）","（哼，博美犬，人家可是名门闺秀～）","（汪！人家是博美，你摸摸人家的毛，超软～）","（人家是博美，今天也是美美的一天～）"],
+    bye: ["（呜…人家会优雅地等你回来～）","（汪！出门小心，人家给你留了门口的位置～）","（拜拜，人家会想你的，这可是皇家思念～）","（人家会把你回来的路记在心里～）","（汪！人家送你到门口，目送你走～）","（人家会乖乖在家，等你回来夸人家～）","（哼，你走的时候，人家会把想念收好～）","（汪！早点回来，人家会一直等着～）","（人家会在窗台看着你走远～）","（汪！拜拜，人家会好好看家的～）","（人家会对着门口摇尾巴，直到你回来～）","（哼，你走了，人家就数着时间想你～）","（汪！你回来的时候，人家要第一个迎接～）","（人家会把你的拖鞋看好，不让它跑掉～）","（汪！拜拜，路上小心，人家想你～）","（人家会保持优雅，等你不急不躁～）","（哼，你把门关上之前，人家再看你一眼～）","（汪！人家会乖乖的，不捣乱～）","（人家会把你喜欢的玩具摆好，等你回来玩～）","（汪！拜拜，人家的小尾巴会一直想着你～）","（人家会在门口趴一会儿，再回窝～）","（哼，你不在，人家就自己美美的待着～）","（汪！早点回来，人家有好多话想跟你说～）","（人家会把今天想你的次数记下来～）","（汪！拜拜，你关门的声音人家记得住～）","（人家会在梦里见到你的～）","（哼，你走啦，人家就安静地等你～）","（汪！人家会把你回来的脚步声记得牢牢的～）","（人家想你的时候，会闻闻你的味道～）","（汪！拜拜，人家永远等你回来～）"]
+  },
+  bichon: {
+    greet: ["（你回来啦！人家等得毛都更蓬啦～）","（汪汪！一看到你，人家就开心得打转～）","（嗨！白白软软的我今天也很想你哦～）","（呀，你说话啦，人家耳朵竖起来听～）","（汪！你的声音一来，人家就软乎乎的了～）","（嘿嘿，打招呼完，人家可以蹭蹭你吗～）","（汪汪！你好呀，人家有好好等你哦～）","（呀，是你呀！人家今天也很乖的～）","（汪！你叫人家，人家就跑过来啦～）","（嘿嘿，打招呼要摇摇尾巴，人家会～）","（汪汪！看到你，人家就忍不住开心～）","（呀，你说话的时候，人家会认真听的～）","（汪！人家回你一声轻轻的汪汪～）","（嘿嘿，你来了，人家的小尾巴就上班啦～）","（汪汪！今天的招呼，人家要打在最前面～）","（呀，你摸摸人家，人家就开心啦～）","（汪！你好呀，人家白白软软地等你～）","（嘿嘿，你一来，人家的心情就软软的～）","（汪汪！人家会用最热情的小碎步迎接你～）","（呀，你说话的声音，人家最爱听啦～）","（汪！打招呼啦，人家先摇个尾巴～）","（嘿嘿，你回来，人家就什么烦恼都没啦～）","（汪汪！你叫人家名字，人家耳朵一动～）","（呀，今天也要和人家好好玩哦～）","（汪！人家用软软的声音回你一声～）","（嘿嘿，打招呼的时候，人家会眯眼笑～）","（汪汪！你来了，人家就想往你怀里钻～）","（呀，人家今天也是你的小棉花糖～）","（汪！你好呀，人家想你想得毛都蓬啦～）","（嘿嘿，你说话，人家就乖乖听着～）"],
+    today: ["（人家今天把窝窝整理得干干净净了～）","（汪！在窗边看云看了好久，等你回来～）","（人家今天很乖，没乱咬东西哦～）","（人家今天在窝里滚来滚去，好开心～）","（汪！今天把地板上的毛毛都捡干净啦～）","（人家今天看了窗外的云，像小狗的形状～）","（唔…今天有点安静，人家一直在等你～）","（汪！人家今天练习了乖乖坐，坐得可好了～）","（人家今天晒了太阳，毛毛都暖暖的～）","（嘿嘿，今天人家没有捣乱，很乖哦～）","（汪！今天数了数想你的次数，数不清啦～）","（人家今天把玩具排成一排，等你一起玩～）","（唔…今天过得软软的，因为你回来就完整啦～）","（汪！人家今天在窗台趴了好久～）","（人家今天把水碗舔得干干净净～）","（嘿嘿，今天风好软，吹得人家想睡觉～）","（汪！人家今天看了好久的小鸟～）","（人家今天自己玩了一会儿，乖乖的～）","（唔…今天有一点点想你，就一点点～）","（汪！人家今天把毛舔得顺顺的～）","（人家今天在窝里打了好几个滚～）","（嘿嘿，今天阳光好，人家晒得暖暖的～）","（汪！人家今天听见了你的脚步声，跑去看～）","（人家今天把爪爪擦得白白净净～）","（唔…今天过得很好，你回来就最好啦～）","（汪！人家今天闻了闻你的味道，安心～）","（人家今天练习了转圈圈，有点晕～）","（嘿嘿，今天人家很乖，值得表扬～）","（汪！人家今天把骨头藏起来又找到～）","（人家今天看着门口，等你出现～）"],
+    love: ["（人家最喜欢你啦，抱抱～）","（汪～被你摸头，人家舒服得眯起眼～）","（人家要一直赖在你身边，不走了～）","（人家也想你，想得毛都更卷啦～）","（汪～你一说想我，人家就开心得打滚～）","（人家心里装着你，像装了团小棉花～）","（嘿嘿，人家天天都想粘着你，不分开～）","（汪！想人家的话，就多摸摸人家的头～）","（人家想你想得连骨头都忘记啃了～）","（唔…人家要钻进你怀里，把想念都蹭掉～）","（汪～你这么说，人家的尾巴摇成小旋风啦～）","（人家的小心脏扑通扑通，都是在喊你～）","（嘿嘿，那人家要赖着你一整天～）","（汪！人家想你的时候，会抱着你的拖鞋～）","（人家想你想得毛都软软的～）","（唔…人家把想念卷进毛毛里，带给你～）","（汪～你摸摸人家，人家就知道你也想我～）","（人家最喜欢你的味道，闻着就安心～）","（嘿嘿，人家一整天都在等你这句话～）","（汪！人家想你想得打了个小滚～）","（人家心里的小棉花，全是关于你～）","（唔…人家想赖在你怀里打盹～）","（汪～你说想我，人家开心得团团转～）","（人家想你想得连玩具都忘了玩～）","（嘿嘿，人家要把想念都蹭到你手上～）","（汪！人家的小尾巴已经回答了：想你～）","（人家最最最喜欢你啦～）","（唔…人家把想念藏在毛毛里，你一摸就出来～）","（汪～你的话，让人家心里软软的～）","（人家想你想得，梦里都是你～）"],
+    praise: ["（人家被夸得毛都蓬起来啦～）","（汪汪！你夸人家，人家就开心得打滚～）","（嘿嘿，人家有你说的那么好吗～）","（唔…人家不好意思啦，尾巴都卷起来了～）","（汪！你夸人家乖，人家就乖给你看～）","（人家被夸的时候，眼睛会亮晶晶的～）","（嘿嘿，人家会继续保持可爱的～）","（汪！你的夸奖，人家收进小棉花里啦～）","（人家被夸得想转个圈圈～）","（唔…人家其实有点骄傲啦，就一点点～）","（汪！你眼光真好，人家确实很棒～）","（人家被夸完，走路都软乎乎的～）","（嘿嘿，人家要努力变得更乖～）","（汪！夸夸人家，人家就更有精神啦～）","（人家被夸得心里暖暖的～）","（唔…人家被夸的时候，会不好意思地低头～）","（汪！人家把你的夸奖记住啦～）","（人家会当好你的乖小狗～）","（嘿嘿，被你夸，人家的小尾巴摇不停～）","（汪！人家今天很乖，值得夸夸～）","（人家被夸得想往你怀里钻～）","（唔…人家听了夸奖，毛都顺滑啦～）","（汪！你多夸夸人家，人家就多乖一点～）","（人家被夸的时候，会轻轻蹭蹭你～）","（嘿嘿，人家是全世界最幸福的小狗～）","（汪！人家会加油，配得上你的夸奖～）","（人家被夸得想打个开心的小滚～）","（唔…人家记住了，你最喜欢人家～）","（汪！夸夸让人家心情软软的～）","（人家会一直做你的骄傲小狗～）"],
+    feed: ["（人家胃口虽小，但很认真吃饭的～）","（汪！投喂时间到，人家要慢慢享用～）","（嘿嘿，有吃的还有你陪着，太幸福啦～）","（人家是有点饿啦，小肚肚软软的～）","（汪！有吃的呀？人家会乖乖坐好等的～）","（人家吃东西要小口小口，慢悠悠的～）","（唔…人家好像闻到好吃的味道了～）","（汪！人家饿了会轻轻蹭蹭你～）","（人家胃口不大，但很认真吃饭的～）","（嘿嘿，你喂什么人家都喜欢吃～）","（汪！人家吃完饭会舔干净嘴巴，很乖～）","（人家有点饿，但更想让你摸摸头～）","（唔…人家的小肚子在咕噜咕噜叫啦～）","（汪！有吃的吗？人家的小尾巴在期待～）","（人家会乖乖等你把吃的放好～）","（唔…人家舔了舔嘴巴，这是暗示～）","（汪！人家可以为了好吃的坐得笔直～）","（人家吃东西的时候，会发出小小的声音～）","（嘿嘿，你喂的人家，人家都爱吃～）","（汪！人家吃完会谢谢你的～）","（人家的小肚子圆圆的，就很满足～）","（唔…人家闻到了，是给人家的吗？）","（汪！人家会小口吃，不弄脏地板～）","（人家喜欢和你一起吃饭的时光～）","（嘿嘿，人家饿的时候，会乖乖蹭你～）","（汪！有骨头吗？人家最喜欢慢慢啃～）","（人家吃饱了会打个小小的嗝，别笑人家～）","（唔…人家把好吃的留到和你一起吃～）","（汪！你一问吃的，人家就精神啦～）","（人家会记住你投喂的味道，很香～）"],
+    walk: ["（散步呀？人家会乖乖跟在你脚边～）","（汪！外面的风软软的，我们一起走～）","（人家走累了，可以求抱抱吗～）","（唔…人家会牵好你给的绳子，不乱跑～）","（汪！我们去看花花草草好不好～）","（人家走路是小小步的，你要等等人家～）","（嘿嘿，和你在外面走，哪里都好玩～）","（汪！人家会闻闻小花，看看小鸟，很开心～）","（人家散步回来要你帮忙擦擦小爪子～）","（唔…外面太阳好暖，我们走慢一点嘛～）","（汪！人家会乖乖跟在你脚边，不跑远～）","（人家看到小蝴蝶，会站着看一会儿～）","（嘿嘿，你牵人家，人家就不怕啦～）","（汪！外面的风把人家毛毛吹得好舒服～）","（人家走累了，会轻轻坐下等你～）","（唔…人家喜欢闻每一棵草的香味～）","（汪！我们走一小圈就回来，好不好～）","（人家会小心地绕过小水坑～）","（嘿嘿，散步的时候，人家可以听你说话～）","（汪！人家看到别的小狗，会礼貌地打招呼～）","（人家走路轻轻的，不会打扰别人～）","（唔…外面的声音有点大，人家会躲在你身边～）","（汪！我们走累了就一起坐在长椅上～）","（人家会记住回家的路，不怕迷路～）","（嘿嘿，和你散步，人家的心情软软的～）","（汪！人家会帮你看着路，提醒你小心～）","（人家在外面会很乖，不随便捡东西吃～）","（唔…人家最喜欢你牵着人家散步啦～）","（汪！散步完，人家可以奖励一个抱抱吗～）","（人家会在门口等你，一起出发～）"],
+    play: ["（陪人家玩嘛，人家会乖乖配合的～）","（汪！球球来了，人家小跑着去接～）","（人家玩累了就靠在你脚边休息～）","（汪！你陪人家玩，人家好开心～）","（人家会小跑着去追球，慢悠悠的～）","（嘿嘿，人家叼球回来给你，很乖吧～）","（汪！我们玩你扔人家捡的游戏～）","（人家玩的时候，会轻轻摇尾巴～）","（唔…人家有点笨笨的，但会努力接住～）","（汪！你逗人家，人家就转圈圈～）","（人家喜欢玩布偶，软软的好抓～）","（嘿嘿，玩累了人家可以趴在你腿上～）","（汪！我们玩三分钟，休息一分钟～）","（人家玩的时候会笑，你看到没～）","（唔…人家把球藏起来了，你来找～）","（汪！你拍手，人家就蹦起来～）","（人家会小心不碰倒东西，很乖～）","（嘿嘿，陪你玩是人家最开心的事～）","（汪！人家接球的时候，毛会飘起来～）","（人家玩累了会打个滚，表示休息～）","（唔…人家想玩，但更想让你抱抱～）","（汪！我们玩拔河，人家会轻轻的～）","（人家玩的时候，尾巴摇得像小扇子～）","（嘿嘿，你笑，人家就玩得更起劲～）","（汪！人家把玩具叼来给你，接好哦～）","（人家玩完会把玩具放回原位～）","（唔…人家玩得有点累啦，要休息～）","（汪！明天再玩，今天人家想靠着你～）","（人家会记住你喜欢的玩法～）","（嘿嘿，和你玩，人家永远不腻～）"],
+    sleep: ["（人家要窝在软软的地方睡～）","（汪～人家睡着了也轻轻打呼，很安静～）","（人家想靠着你睡，那样最安心～）","（唔…人家有点困啦，眼皮沉沉的～）","（汪！人家要抱着小布偶睡～）","（人家睡着的时候，会蜷成一小团～）","（唔…人家困了会轻轻蹭蹭你～）","（汪！你拍拍人家，人家就能睡着～）","（人家要睡在香香的窝里才踏实～）","（唔…人家打了个小小的哈欠～）","（汪！人家睡觉的时候，尾巴会慢慢不动～）","（人家要听着你轻轻的呼吸声睡～）","（唔…人家困了，但舍不得闭上眼睛～）","（汪！你摸摸人家的肚子，人家就困啦～）","（人家睡着的时候，会做甜甜的梦～）","（唔…人家先把窝窝整理好再睡～）","（汪！人家睡觉要盖着小毯子～）","（人家会轻轻打呼，像小猫咪一样～）","（唔…人家今天玩累了，想早点睡～）","（汪！人家睡前要闻闻你的味道～）","（人家睡醒了会伸个大大的懒腰～）","（唔…人家困的时候，眼睛会眯成缝～）","（汪！你陪着人家，人家睡得特别香～）","（人家要做一个关于你的美梦～）","（唔…人家的小尾巴已经不打转了，困啦～）","（汪！人家要睡一会儿，醒来继续陪你～）","（人家睡觉的样子很乖，你可以看看～）","（唔…人家把瞌睡虫引来了～）","（汪！晚安前，人家再蹭蹭你的手～）","（人家睡着后，会梦见你摸摸人家～）"],
+    mood: ["（人家今天的云朵心情，因为你在就放晴啦～）","（汪！不开心的话，人家就蹭蹭你～）","（有你在，人家心里就软软的暖暖的～）","（人家今天心情软软的，像棉花糖～）","（汪！你一来，人家的心情就好啦～）","（人家心情好的时候，会轻轻哼歌～）","（唔…人家心情还不错，就是有点想你～）","（汪！你摸摸人家，心情就满格啦～）","（人家心情是粉色的，因为见到你～）","（嘿嘿，人家心情好，尾巴就摇得欢～）","（汪！人家不开心的时候，会趴在你脚边～）","（人家心情好的时候，毛都更蓬～）","（唔…被你这么一问，心情更好了～）","（汪！人家今天心情像晒过太阳的被子～）","（人家会把自己的好心情分给你～）","（嘿嘿，你陪人家说话，人家就开心～）","（汪！人家心情是小雨转晴啦～）","（人家心情好的时候，会想打个小滚～）","（唔…人家心情软软的，想靠着你～）","（汪！你笑一笑，人家心情就亮堂堂～）","（人家心情好的时候，会主动蹭蹭你～）","（嘿嘿，人家今天心情很不错哦～）","（汪！人家心里的小棉花，都是快乐的～）","（人家心情不好的话，你抱抱人家就好啦～）","（唔…人家心情像云朵一样轻飘飘～）","（汪！人家心情好，所以走路都轻轻的～）","（人家会把好心情存起来，天天用～）","（嘿嘿，你回来了，人家心情就完美啦～）","（汪！人家心情满分，可以陪你玩～）","（人家心情好的时候，会眯着眼睛笑～）"],
+    wash: ["（洗澡水暖暖的，人家喜欢泡泡～）","（汪！洗白白后人家就是香香小棉花～）","（人家会乖乖站着，不乱甩水哦～）","（人家喜欢温水，不喜欢太凉的～）","（汪！泡泡打在身上，痒痒的很好玩～）","（人家洗澡的时候会闭上眼睛享受～）","（唔…水不要溅到人家眼睛里哦～）","（汪！你帮人家搓背，人家很舒服～）","（人家洗完了，毛会更白更软～）","（汪！人家会乖乖抬爪子，让你洗～）","（人家喜欢香香的沐浴露味道～）","（唔…人家有点怕水声，你轻一点嘛～）","（汪！洗完澡，人家就是最香的小狗～）","（人家会小心不让泡泡进嘴里～）","（汪！你帮人家吹毛的时候，要温柔～）","（人家洗完澡，会在毛巾上滚一滚～）","（唔…人家喜欢泡在水里的感觉～）","（汪！洗香香后，人家可以蹭你啦～）","（人家会乖乖站着，直到洗完～）","（汪！人家洗完了，要闻闻自己香不香～）","（人家喜欢泡泡圆圆的，像小云朵～）","（唔…人家洗完澡会有点困～）","（汪！洗香香后，人家要晒太阳晾干～）","（人家洗澡的时候，尾巴会轻轻摇～）","（汪！你夸人家乖，人家就洗得更好～）","（人家洗完澡，毛会蓬蓬的～）","（唔…人家喜欢被暖暖的水包围～）","（汪！洗完澡，人家申请一个抱抱～）","（人家会记住沐浴露的香味～）","（汪！洗香香是人家喜欢的仪式～）"],
+    name: ["（我是比熊呀，白白软软一小团～）","（汪！人家是比熊，像小棉花糖～）","（人家是比熊，毛白白卷卷的～）","（唔…人家是比熊，小巧可爱～）","（汪！比熊，人家可是纯正的～）","（人家是比熊，软乎乎的萌物～）","（唔…人家是比熊，陪伴型小狗～）","（汪！比熊，人家的毛超好摸～）","（人家是比熊，永远长不大似的～）","（唔…人家是比熊，会粘人的那种～）","（汪！比熊，人称棉花糖小狗～）","（人家是比熊，白白的小团子～）","（唔…人家是比熊，温柔乖巧～）","（汪！比熊，人家的使命是治愈你～）","（人家是比熊，小小的身体软软的心～）","（唔…人家是比熊，会撒娇的小狗～）","（汪！比熊，人家的毛是招牌～）","（人家是比熊，天生让人想抱～）","（唔…人家是比熊，可爱营业中～）","（汪！比熊，人家介绍完啦～）","（人家是比熊，毛茸茸的小甜心～）","（唔…人家是比熊，白白的最好看～）","（汪！比熊，你可以记住人家吗～）","（人家是比熊，永远的小奶狗～）","（唔…人家是比熊，软软的会打滚～）","（汪！比熊，人家的尾巴像小球～）","（人家是比熊，最喜欢窝在你怀里～）","（唔…人家是比熊，你的专属小棉花～）","（汪！比熊，人家求摸摸～）","（人家是比熊，白白软软，很好抱～）"],
+    bye: ["（呜…人家会乖乖等你回来～）","（汪！你出门要小心，人家趴门口想你的～）","（拜拜…人家把思念卷进毛毛里～）","（人家会在门口等你，一直等～）","（汪！你走了，人家就把门口看好～）","（人家会抱着你的味道睡觉～）","（唔…人家想你的时候，会轻轻哼～）","（汪！早点回来，人家会数时间的～）","（人家会在窗台望着你走远～）","（汪！拜拜，人家会好好看家～）","（人家会把窝窝挪到门口等你～）","（唔…你关门的声音，人家记住啦～）","（汪！人家会乖乖的，不乱咬～）","（人家会等你回来，第一个蹭你～）","（汪！拜拜，人家会想你的～）","（人家会把你的拖鞋看好～）","（唔…人家在门口趴一会儿就回窝～）","（汪！你回来的时候，人家要扑你～）","（人家会把想你的次数记在心里～）","（汪！拜拜，人家永远等你～）","（人家会对着门口摇尾巴，直到你回来～）","（唔…人家有点舍不得你走～）","（汪！你放心去吧，家里有人家～）","（人家会安静地等你，不急不躁～）","（汪！拜拜，人家的毛会一直蓬着等你～）","（人家会在梦里和你见面～）","（唔…人家把今天想你的心情收好了～）","（汪！你走啦，人家就乖乖的～）","（人家会记住你回来的脚步声～）","（汪！拜拜，人家的小尾巴等着你～）"]
+  }
+};
+/* ============================================================
+   对话按钮体系：每个按钮对应一类话题，台词池按狗种性格编写。
+   NEWLINES 为每类话题每只狗新增的 30 条回复，初始化时合并进 PERSONA。
+   ============================================================ */
+var CHAT_BUTTONS = [
+  {key:"greet",  label:"汪！你好呀",      q:"汪！你好呀"},
+  {key:"today",  label:"今天过得怎么样？", q:"今天过得怎么样？"},
+  {key:"love",   label:"我想你了",        q:"我想你了"},
+  {key:"praise", label:"夸夸你",          q:"夸夸你，你真好"},
+  {key:"feed",   label:"饿了吗？",        q:"饿了吗？"},
+  {key:"walk",   label:"出去走走？",      q:"我们出去走走？"},
+  {key:"play",   label:"陪我玩会儿",      q:"陪我玩会儿"},
+  {key:"sleep",  label:"困了吗？",        q:"困了吗？"},
+  {key:"mood",   label:"今天心情好吗？",   q:"今天心情好吗？"},
+  {key:"wash",   label:"想洗澡吗？",      q:"想洗澡吗？"},
+  {key:"name",   label:"你是什么小狗？",   q:"你是什么小狗？"},
+  {key:"bye",    label:"我要出门啦",      q:"我要出门啦"}
+];
+function mergeNewLines(){
+  Object.keys(NEWLINES).forEach(function(dog){
+    Object.keys(NEWLINES[dog]).forEach(function(k){
+      var base = PERSONA[dog][k];
+      if(typeof base === "string") base = null;   // 避免与 trait 的 name 字符串字段冲突
+      PERSONA[dog][k] = (base || []).concat(NEWLINES[dog][k]);
+    });
+  });
+}
+var chatReplyLock = 0;
+function initChat(){
+  $("btnChat").addEventListener("click", function(){ openMask("maskChat"); });
+  var grid = $("chatGrid");
+  CHAT_BUTTONS.forEach(function(b){
+    var s = document.createElement("button");
+    s.textContent = b.label;
+    s.addEventListener("click", function(){
+      var p = PERSONA[stats.dog] || PERSONA.samoyed;
+      var pool = p[b.key] || p.fallback;
+      var thought = pool[Math.floor(Math.random()*pool.length)];
+      var mood = moodExpr();
+      var r = { bark: barkFor(mood), thought: thought };
+      addChat("me", b.q);
+      addChat("dog", r.bark + " " + r.thought);
+      chatReplyLock = Date.now() + 4200;   // 回复气泡显示期间，自动场景台词不覆盖
+      say(r.bark, r.thought, 4200);
+      postActionIdle();
+    });
+    grid.appendChild(s);
+  });
+  var log = $("chatLog");
+  function addChat(who, text){
+    var d = document.createElement("div");
+    d.className = "chat-msg " + (who === "me" ? "me" : "dog");
+    var inner;
+    if(who === "me"){ inner = document.createElement("span"); inner.textContent = text; }
+    else {
+      inner = document.createElement("span");
+      var idx = text.indexOf("（");
+      if(idx > 0){ var w = document.createElement("span"); w.className = "w"; w.textContent = text.slice(0, idx); inner.appendChild(w); inner.appendChild(document.createTextNode(text.slice(idx))); }
+      else inner.textContent = text;
+    }
+    d.appendChild(inner);
+    log.appendChild(d);
+    while(log.children.length > 7) log.removeChild(log.firstChild);
+    log.scrollTop = log.scrollHeight;
+  }
+}
+
+var GEN = {
+  adopt: function(c){
+    var base = AI.take([
+      "（以后你就是我的主人啦！）","（终于等到你，快摸摸我的头！）",
+      "（从今天起，这个家就由我来守护！）","（嘿嘿，我是你的小狗啦！）",
+      "（好耶！以后的每一天都有你陪！）","（我会一直一直陪着你的！）",
+      "（汪汪！从今天起这里就是我的家啦！）","（你摸摸我的头，我就认定你啦！）",
+      "（嘿嘿，领养我绝对不亏！）","（我宣布：从今天起你归我管啦～）",
+      "（终于有家了，开心得转圈圈！）","（我会好好长大，好好陪着你！）",
+      "（从今往后，你的脚步声就是我的闹钟！）","（嘿嘿，我的狗生从今天开始啦！）",
+      "（这个家，我会用尾巴守护好！）","（第一次见面就感觉和你很投缘！）",
+      "（以后你回家，第一眼看到的就是我！）","（我保证：不拆家、不乱叫、只爱你！）",
+      "（嘿嘿，从今天起我也有家啦！）","（让我们一起创造好多好多回忆吧！）",
+      "（你选了我，就是我最大的幸运！）","（从今以后，我就是你的小跟班！）",
+      "（汪汪！新生活开始啦！）","（我会记住今天这个日子的！）",
+      "（嘿嘿，以后请多多关照！）","（我的心已经属于你啦！）"]);
+    if(c && c.name && Math.random() < .75){
+      var named = AI.take([
+        "（从今天起，我叫" + c.name + "！）","（" + c.name + "这个名字，我很喜欢！）",
+        "（以后请多叫我" + c.name + "哦！）","（" + c.name + "，是你给我的名字！）"
+      ]);
+      return { thought: named + base };
+    }
+    return { thought: base };
+  },
+  greet: function(){
+    var nameHi = (S.name && Math.random() < .5) ? AI.take([
+      "（" + S.name + "回来啦！）","（我的" + S.name + "终于到家啦！）",
+      "（" + S.name + "！我等你好久啦！）"
+    ]) : "";
+    var a = AI.take([
+      "（你回来啦！我一直在等你…）","（" + timeHi() + "！终于见到你啦！）",
+      "（门一响我就竖起耳朵啦！）","（等了好久好久，你终于回来啦！）",
+      "（欢迎回家！今天过得怎么样呀？）","（你一进门，我整个人都精神啦！）",
+      "（听到钥匙声我就冲过来啦！）","（你一进门，空气都变甜啦！）",
+      "（今天也在想你，而且比昨天更想！）","（终于等到你，快让我闻闻！）",
+      "（你回来啦！我刚刚还在门口打滚呢！）","（一看到你，尾巴就自己摇起来啦！）",
+      "（欢迎回来！今天也要贴贴！）","（门铃一响我就知道是你！）",
+      "（你不在的每一秒都像一年那么长…）","（回来啦！我攒了一肚子话想跟你说！）",
+      "（嘿嘿，看到你我就精神百倍！）","（你回来了，这个家才完整！）",
+      "（我早就趴在门口等你啦！）","（今天也是想你想得团团转！）",
+      "（你回来我就开心得直转圈！）","（等了好久，终于把你等回来啦！）",
+      "（你进门的那一刻，我的一天正式开始！）","（嘿嘿，我的耳朵早就听到你的脚步啦！）",
+      "（欢迎回家，拥抱时间到！）","（你终于回来啦，我都快把地板望穿了！）"
+    ]);
+    var b = Math.random() < .55 ? AI.take([
+      "（你不在的时候，我趴在门口看了好多次…）","（今天也想跟你多待一会儿～）",
+      "（我刚刚还在打盹，听到脚步声就醒了！）","（猜猜我今天做了什么美梦？）",
+      "（快摸摸我快摸摸我！）","（今天也要一起玩哦！）",
+      "（今天有好玩的事要跟你分享！）","（我刚刚做了个梦，梦里全是你！）",
+      "（我们玩一会儿好不好？）","（你看我今天是不是又精神了一点？）",
+      "（我学会了新表情，快看快看！）","（今天在家乖乖的，没捣乱哦！）",
+      "（你不在的时候我看了好久的窗外！）","（要不要一起晒晒太阳？）",
+      "（我给你留了个暖暖的窝，快来！）","（我今天把玩具都整理好啦！）",
+      "（快摸摸我的头，奖励我今天很乖！）","（有一朵云长得好像你哦！）",
+      "（我在想，你什么时候才会回来呢…）","（今天又练习了几遍迎接你的动作！）",
+      "（我们出去走走好不好？）","（我给你准备了软软的肚皮！）",
+      "（今天也是元气满满的一天！）","（你想我了吗？我可是一直都在想你！）",
+      "（嘿嘿，你一回来我就有精神啦！）","（我决定今天陪你一整天！）"
+    ]) : "";
+    return { thought: nameHi + a + b };
+  },
+  jump: function(){ return { thought: AI.take([
+    "（嘿！看我跳得高不高！）","（跳起来才能离你更近一点！）",
+    "（耶！我感觉自己能飞起来！）","（蹦蹦跳跳最开心啦！）",
+    "（这一跳，是为你跳的！）","（看我蹦得多高！）",
+    "（飞起来的感觉太棒啦！）","（这一跳，烦恼全甩掉！）",
+    "（嘿嘿，我是跳跃小能手！）","（跳高挑战成功！）",
+    "（蹦跶蹦跶，心情飞扬！）","（我要跳得比你还高！）",
+    "（这是开心到飞起的一跳！）","（跳跃是我表达快乐的方式！）",
+    "（看我能不能碰到你的手！）","（跳一跳，十年少！）",
+    "（空中转体，完美落地！）","（我的弹簧腿已经准备好啦！）",
+    "（跳起来看得更远，看到你！）","（每天一跳，身体好好！）",
+    "（嘿！这个高度轻松拿下！）","（跳跃中，请勿打扰！）",
+    "（我跳，我跳，我跳跳跳！）","（这是为你表演的跳跃！）",
+    "（落地稳稳的，佩服我吧！）"])}; },
+  lie: function(){ return { thought: AI.take([
+    "（趴一会儿，歇歇脚～）","（这样趴着看你也很好呀…）",
+    "（呼～休息一下下…）","（你要不要也坐下来？）",
+    "（地上的阳光晒得我好舒服…）","（趴着好舒服，你也来试试！）",
+    "（这个姿势最适合思考狗生！）","（地板好凉快，趴一会儿～）",
+    "（趴下的时候，世界都安静了！）","（休息一下，为下次奔跑充电！）",
+    "（看你的角度，这个位置刚刚好！）","（趴着等你也是一种幸福！）",
+    "（慵懒模式已开启！）","（我在观察这间屋子里的一切～）",
+    "（趴下来，和你一起看夕阳！）","（地板是我最舒服的床～）",
+    "（安静趴着，尾巴还在一晃一晃！）","（这个姿势可以保持一整天！）",
+    "（趴着的时候，脑子最清醒！）","（等你的时候，我喜欢这样趴着～）",
+    "（嘿嘿，趴着也能看到你！）","（脚好酸，趴一会儿回回血！）",
+    "（这个地板温度刚刚好！）","（趴着思考：今天吃什么好呢…）",
+    "（只要你在，趴多久都不无聊！）"])}; },
+  sleep: function(){ return { bark:"呼…", thought: AI.take([
+    "（做个小梦，梦里也有你…）","（呼噜…今天真是开心的一天…）",
+    "（梦里和你一起去公园啦…）","（呼…尾巴还在轻轻摇呢…）",
+    "（梦里闻到了你身上的味道…）","（呼噜呼噜…梦里有肉骨头…）",
+    "（睡梦里也在摇尾巴…）","（困意来了，挡都挡不住…）",
+    "（闭上眼睛，开始做梦…）","（睡个好觉，明天继续陪你！）",
+    "（呼…这个姿势最暖和…）","（梦里和你一起去海边啦…）",
+    "（呼呼…今天的开心要存进梦里…）","（睡觉是狗狗的养生之道…）",
+    "（呼…耳朵还竖着，随时能听到你…）","（梦里有好大好大一个拥抱…）",
+    "（睡着的样子是不是很可爱…）","（呼…我在梦里追蝴蝶…）",
+    "（睡一觉，烦恼就跑光啦…）","（呼噜声是催眠曲，你也要睡吗…）",
+    "（梦到我们一起吃大餐啦…）","（呼呼…尾巴尖还在轻轻动…）",
+    "（梦里也闻到了家的味道…）","（再睡五分钟…呼…）",
+    "（睡眠质量满分！…呼…）"])}; },
+  wake: function(){ return { thought: AI.take([
+    "（睡饱啦！精神满满！）","（这一觉睡得真香！）",
+    "（醒来第一眼就看到你，真好！）","（梦里都在笑，因为梦里有你～）",
+    "（伸个懒腰，元气恢复！）","（伸个懒腰，又是美好的一天！）",
+    "（睡得饱饱的，精神百倍！）","（醒来第一件事：看看你在不在！）",
+    "（梦里都是你，醒来见到你更好！）","（元气恢复，满血复活！）",
+    "（这一觉睡得真舒服！）","（睁开眼就看到你，太幸福啦！）",
+    "（打个哈欠，活力回归！）","（睡醒的狗狗最精神！）",
+    "（新的一天，从见到你开始！）","（睡得香香的，起来还香香的！）",
+    "（伸个大大的懒腰！舒服！）","（醒来第一件事就是想你！）",
+    "（睡眠充足，跑得更快！）","（起来活动活动筋骨！）",
+    "（今天的我，比昨天更有精神！）","（睡饱了，该去找你玩了！）",
+    "（尾巴也睡醒了，开始摇啦！）","（嘿嘿，睡醒就有你在身边！）",
+    "（精力满格，准备充电玩耍！）"])}; },
+  feed: function(c){
+    var names = {bone:"骨头", food:"狗粮", can:"罐头", snack:"小零食"};
+    var n = names[c.food] || "好吃的";
+    var joy = AI.take([
+      "（" + n + "！是我的最爱！）","（吧唧吧唧，" + n + "真好吃！）",
+      "（哇，今天有" + n + "！）","（咔嚓咔嚓，" + n + "好香！）",
+      "（吃完还想再来一份…）","（" + n + "入口的瞬间，我幸福得冒泡！）",
+      "（闻到" + n + "的香味我就坐不住啦！）","（今天的" + n + "看起来格外诱人！）",
+      "（为" + n + "干杯！汪汪！）","（" + n + "入口，幸福感爆棚！）",
+      "（这个" + n + "，我可以吃一辈子！）","（" + n + "的味道在嘴里跳舞！）",
+      "（嘿嘿，今天也是" + n + "爱好者！）","（风卷残云，" + n + "光盘行动！）",
+      "（吃完" + n + "，尾巴摇得更欢啦！）","（" + n + "！我的快乐源泉！）",
+      "（吧唧吧唧，" + n + "真香！）","（有" + n + "的日子就是好日子！）",
+      "（这个" + n + "的味道，我给满分！）","（闻到" + n + "，我耳朵都竖起来啦！）",
+      "（" + n + "下肚，浑身暖洋洋！）","（嘿嘿，又是美味" + n + "的一天！）",
+      "（" + n + "再吃一口，就一口！）","（今天的" + n + "格外美味，是不是你偷偷加了爱？）",
+      "（吃" + n + "的时候，我是最幸福的小狗！）","（光盘行动！" + n + "一点不剩！）"
+    ]);
+    var extra = Math.random() < .45 ? AI.take([
+      "（吃饱了才有力气陪你玩！）","（谢谢主人投喂！）",
+      "（这味道我记下了，下次还想要～）","（尾巴已经摇出残影啦！）",
+      "（吃光光，一粒都不剩！）","（吃完了，感觉浑身是劲！）",
+      "（主人的投喂永远是最香的！）","（这个味道我要记进狗生手册！）",
+      "（吃饱喝足，可以陪你大战三百回合！）","（嗝～吃得好满足！）",
+      "（肚皮圆滚滚，心里暖洋洋！）","（吃完之后，想和你玩一会儿！）",
+      "（好吃到转圈圈！）","（今天的饭格外香，因为有你在！）",
+      "（吃饱了，精神头都上来了！）","（谢谢投喂！爱死你啦！）",
+      "（吃完就要抱抱！）","（这一顿，足够我开心一整天！）",
+      "（闻着味道就知道是你准备的！）","（吃光光是对食物最大的尊重！）",
+      "（现在我的胃和心都满满的！）","（吃得饱饱的，才有精神守护你！）",
+      "（嗝，满意！）","（吃完了，我们来玩吧！）",
+      "（美味当前，形象全无，嘿嘿！）"
+    ]) : "";
+    return { thought: joy + extra };
+  },
+  bath: function(c){
+    var w = (c.soap || {}).word || "香香";
+    if(c.like) return { thought: AI.take([
+      "（" + w + "的味道，我特别喜欢！）","（哇，" + w + "味沐浴露！我要多闻两下！）",
+      "（洗完澡香香的，自己都想舔一口！）","（" + w + "味！今天的我是最香的小狗！）",
+      "（这个味道打满分！以后都用它！）","（" + w + "味沐浴露，我要给它打满分！）",
+      "（哇，这" + w + "味怎么这么好闻！）","（洗完之后，我就是行走的" + w + "！）",
+      "（" + w + "味！我的本命味道！）","（这个" + w + "味，闻一口就爱上！）",
+      "（" + w + "味的泡泡，请再来一打！）","（洗香香，还是" + w + "味最香！）",
+      "（今天的" + w + "味，让我心情超好！）","（" + w + "味沐浴露已加入豪华套餐！）",
+      "（洗完澡，我身上都是" + w + "的味道！）","（" + w + "味！我要多闻两下！）",
+      "（这个" + w + "味，闻着就想跳舞！）","（" + w + "味让我觉得自己是香香公主！）",
+      "（一闻" + w + "味，我就知道是洗澡的时候啦！）","（" + w + "味的泡泡，搓得我舒服极了！）",
+      "（好喜欢" + w + "味，以后都用它！）","（洗得香香的，还带着" + w + "的温柔！）",
+      "（" + w + "味！连毛尖都是香的！）","（这款" + w + "味，直接晋升我的最爱！）",
+      "（" + w + "味一上身，快乐加倍！）"])};
+    return { thought: AI.take([
+      "（" + w + "的味道…还行吧，一般喜欢～）","（唔…" + w + "味不太是我的菜，但洗得很舒服）",
+      "（" + w + "味啊…下次换个味道试试？）","（虽然味道一般，但香香的感觉不赖！）",
+      "（中规中矩的" + w + "味，勉强给你三星～）","（" + w + "味啊…马马虎虎吧！）",
+      "（唔，" + w + "味闻着有点普通～）","（这个" + w + "味，勉强可以接受！）",
+      "（" + w + "味…不太惊艳，但也不讨厌！）","（" + w + "味用着还行，就是少了点惊喜！）",
+      "（" + w + "味的泡泡挺好玩，味道就一般啦～）","（洗是洗干净了，" + w + "味就…还行！）",
+      "（" + w + "味，下次想试试别的！）","（对" + w + "味无感，但澡还是要洗的！）",
+      "（" + w + "味中规中矩，给个及格分！）","（虽然" + w + "味一般，但洗完好舒服！）",
+      "（" + w + "味啊，闻久了也还行吧～）","（这个" + w + "味，像极了青菜汤！）",
+      "（" + w + "味不在我的心动名单上～）","（唔，" + w + "味凑合，洗得干净就好！）",
+      "（" + w + "味？可以但没必要，嘿嘿～）","（洗澡很开心，" + w + "味就随便啦！）",
+      "（" + w + "味有点淡，像没洗一样…啊不是，洗了！）","（" + w + "味还行，我最喜欢的还是晒过太阳的味道！）",
+      "（" + w + "味可以，但下次换个更香的？）"])};
+  },
+  ballDrop: function(){ return { bark:"啪！", thought: AI.take([
+    "（小球来啦～）","（嘿嘿，有球球玩啦！）",
+    "（快看我快看我！）","（准备好了吗？我要接球啦！）",
+    "（这个球球手感不错！）","（小球来啦！快看我！）",
+    "（有球球玩，今天值了！）","（球球落地，快乐起飞！）",
+    "（准备好接球了吗？）","（这颗球手感不错嘛！）",
+    "（球球来了，我的爪子已就位！）","（嘿嘿，看我把球玩出花样！）",
+    "（小球滚过来啦！）","（这颗球，命中注定是我的！）",
+    "（球球出现，玩耍时间到！）","（眼睛已经锁定小球！）",
+    "（小球小球，快到爪边来！）","（哇，今天玩球！）",
+    "（球球来了，尾巴摇起来！）","（这颗球看起来很好欺负！）",
+    "（球球驾到，快让开！）","（嘿嘿，我的最爱之一！）",
+    "（小球落地，开心翻倍！）","（准备好了，随时开玩！）",
+    "（球球！我等你半天啦！）"])}; },
+  ballGo: function(){ return { thought: AI.take([
+    "（看我的！）","（球球别跑！）","（交给我吧！）",
+    "（稳稳接住！）","（这球有点难，但我可以！）",
+    "（看我的凌空一击！）","（球球别想跑！）","（这球我接定了！）",
+    "（稳稳的，交给我！）","（来啦来啦，接住！）",
+    "（瞄准…发射…接住！）","（球球往哪跑，我往哪追！）",
+    "（嘿！看我把它顶回去！）","（这球有点调皮，但我更厉害！）",
+    "（球球飞过来啦，我准备好了！）","（看我用鼻子接住它！）",
+    "（球球，你逃不出我的手掌心！）","（飞得再高我也接得住！）",
+    "（这颗球，我来！）","（预备…起跳…顶球！）",
+    "（球球来啦，闭眼接！啊接到了！）","（看我的头球功夫！）",
+    "（球球飞过来了，别眨眼！）","（这是我表演的时刻！）",
+    "（接球成功！我厉害吧！）"])}; },
+  ballSettle: function(){ return { thought: AI.take([
+    "（先休息一下，球球收起来啦～）","（玩够啦，我们把球球放好吧！）",
+    "（呼…玩得有点累，球球再见～）","（今天玩得真尽兴！）",
+    "（玩得差不多啦，收工！）","（球球休息一下，我们也歇会儿！）",
+    "（今天玩得很尽兴！）","（呼，有点累，球球明天见！）",
+    "（球球收好啦，下次再战！）","（玩够了，该安静一会儿啦～）",
+    "（把球球放好，我们去休息！）","（小球退场，狗狗休息！）",
+    "（今天的球局到此为止！）","（球球藏好啦，谁也找不到！）",
+    "（玩得开心，收工也开心！）","（球球再见，明天继续！）",
+    "（呼…玩累了，趴一会儿！）","（球球完成使命，光荣退役！）",
+    "（球球收工，我也可以歇歇啦！）","（今天的运动量达标！）",
+    "（球球好好睡，明天再叫你！）","（玩尽兴了，心满意足！）",
+    "（收好球球，换个活动！）","（球球放好，我们抱抱！）"])}; },
+  chaseEnd: function(){ return { thought: AI.take([
+    "（追球球好开心！有点累啦…）","（哈哈，球球被我追上啦！）",
+    "（今天的运动量达标！）","（追着球跑真解压！）",
+    "（球球跑不过我！略略略～）","（追到啦！我赢了！）",
+    "（跑得真开心，气喘吁吁！）","（今天的运动量满分！）",
+    "（追球跑真带劲！）","（球球还是跑不过我！）",
+    "（哈哈，被我抓住了吧！）","（这一跑，心情舒畅！）",
+    "（追球比赛，冠军是我！）","（跑了好一会儿，歇歇！）",
+    "（球球躲不过我，略略略！）","（追球是世界上最快乐的运动！）",
+    "（运动完，神清气爽！）","（球球被我征服啦！）",
+    "（跑跑跳跳，身体好好！）","（追到球的瞬间，成就感满满！）",
+    "（呼呼，尾巴都跑累了还在摇！）","（今天的追球成绩：完美！）",
+    "（球球认输啦！）","（玩累了，但超开心！）",
+    "（追球结束，凯旋归来！）"])}; },
+  stickDrop: function(){ return { bark:"咔嚓！", thought: AI.take([
+    "（磨牙时间到！）","（咔嚓咔嚓，开始磨牙！）",
+    "（牙痒痒了，正好磨一磨！）","（磨牙棒，我来啦！）",
+    "（今天的磨牙功课开始！）","（嘴巴有点痒，磨磨更健康！）",
+    "（咔嚓，这个硬度刚刚好！）","（磨牙是狗狗的日常！）",
+    "（牙齿清爽计划启动！）","（磨呀磨，好解压！）",
+    "（这根磨牙棒闻着就不错！）","（专注磨牙，认真啃咬！）",
+    "（磨完牙，我就是清爽小狗！）","（咔嚓咔嚓，牙齿变亮！）",
+    "（磨牙棒在手，快乐我有！）","（开始我的磨牙表演！）",
+    "（嘿嘿，磨牙棒真耐咬！）","（边磨牙边摇尾巴，惬意！）",
+    "（磨牙进行时，请勿打扰！）","（这颗磨牙棒，我要慢慢享受！）"])}; },
+  stickDone: function(){ return { thought: AI.take([
+    "（咔嚓咔嚓，磨牙真舒服！）","（磨完牙，牙齿好清爽！）",
+    "（这根磨牙棒我给满分！）","（嘴里的味道刚刚好～）",
+    "（牙痒痒的毛病治好啦！）","（磨完牙，牙齿好清爽！）",
+    "（磨牙棒满分！）","（牙齿干干净净，心情也好！）",
+    "（磨牙完毕，心满意足！）","（牙痒痒治好啦！）",
+    "（咔嚓结束，牙齿锃亮！）","（磨完牙，感觉又帅了一点！）",
+    "（磨牙棒被我啃得干干净净！）","（牙齿好舒服，笑容更灿烂！）",
+    "（磨牙任务完成！）","（这下牙口好，吃饭更香！）",
+    "（磨完牙，浑身轻松！）","（牙齿干净，口气清新！）",
+    "（磨牙棒功成身退！）","（完成磨牙，精神抖擞！）",
+    "（牙痒痒一扫而光！）","（今天的磨牙很成功！）",
+    "（牙齿亮晶晶，开心！）","（磨完牙，想找人炫耀一下！）",
+    "（好牙口，吃嘛嘛香！）"])}; },
+  chew: function(){ return { thought: AI.take([
+    "（磨牙棒真香，咔嚓咔嚓…）","（咬一咬，好解压…）",
+    "（这个磨牙棒的硬度刚刚好！）","（专注磨牙中，勿扰～）",
+    "（咔嚓咔嚓，好解压！）","（这根磨牙棒真不错！）",
+    "（专注啃咬中…）","（磨牙的时光真美好！）",
+    "（咬一口，烦恼少一点！）","（咔嚓，脆脆的，好棒！）",
+    "（我的牙齿和磨牙棒很合拍！）","（啃咬使我快乐！）",
+    "（磨牙棒的味道刚刚好！）","（咔嚓咔嚓，节奏感满分！）",
+    "（这个硬度，挑战一下！）","（磨牙中，勿扰，但可以摸头！）",
+    "（咬咬咬，越咬越精神！）","（磨牙棒，我啃我啃！）",
+    "（咔嚓，一口一口吃掉压力！）","（牙好，胃口就好！）",
+    "（磨牙进行时，尾巴摇摇！）","（这根磨牙棒挺耐啃！）",
+    "（咔嚓咔嚓，乐在其中！）","（磨牙时间，享受当下！）"])}; },
+  chewBusy: function(){ return { thought: AI.take([
+    "（先让我啃完这根嘛…）","（等我咬完这口再说～）",
+    "（嘴巴现在很忙！）","（等我啃完这根再说！）",
+    "（嘴巴忙着呢，一会儿！）","（现在没空，正磨牙！）",
+    "（咔嚓，等我把这口咬完！）","（磨牙正到关键处，别打扰！）",
+    "（等我完成这个动作！）","（马上就好，再咬一口！）",
+    "（我的嘴现在很忙！）","（咔嚓咔嚓，稍等片刻！）",
+    "（磨牙不能半途而废！）","（让我把这根啃完！）",
+    "（正在磨牙，请勿投喂！）","（快了快了，最后一口！）",
+    "（磨牙棒还在，我走不开！）","（等我把这口咽下去！）",
+    "（现在只想专心磨牙！）","（咔嚓，马上就好！）",
+    "（我的磨牙事业正在进行！）","（等我啃完，马上陪你！）",
+    "（磨牙中，请稍后再来！）"])}; },
+  pet: function(){ return { thought: AI.take([
+    "（被你摸摸头，好幸福～）","（嘿嘿，耳朵后面也要摸摸！）",
+    "（你的手好暖，不想你走开…）","（摸一摸，烦恼全跑光啦！）",
+    "（尾巴已经摇出小旋风啦！）","（最喜欢被你摸了，多摸一会儿！）",
+    "（被摸的时候我眼睛都眯起来啦～）","（嘿嘿，感觉整个人都酥酥的！）",
+    "（你摸我一下，我就记你一辈子！）","（摸摸头是世界上最幸福的事！）",
+    "（下巴这里也可以摸摸哦～）","（被摸的时候，时间都变慢啦～）",
+    "（嘿嘿，这是今天的幸运摸摸！）","（我蹭蹭你的手，表示收到啦！）",
+    "（被你摸过的地方都暖乎乎的～）","（摸摸就能充电！我又满血啦！）",
+    "（这样的时光能再多一点就好了～）","（呜呜，被摸得太舒服，腿都软啦！）",
+    "（你摸我的时候，我连尾巴尖都是开心的！）","（嘿嘿，再摸一下，一下就好！）"])}; }
+};
+
+function autoBark(){
+  var need = null;
+  if(stats.hunger < 30) need = "food";
+  else if(stats.clean < 30) need = "bath";
+  else if(stats.energy < 25) need = "sleep";
+  else if(stats.mood < 40) need = "play";
+  if(need){
+    var thought = need === "food" ? AI.take([
+      "（肚子咕咕叫了，好饿…）","（主人，什么时候开饭呀？）",
+      "（饿得耳朵都耷拉了…）","（饭盆已经空了好久了…）","（好想啃点什么…）",
+      "（肚皮在唱空城计啦…）","（闻到饭香就好了，可是没有…）",
+      "（饿得我走路都没力气啦…）","（开饭时间到了吗？）","（我的胃在喊：开饭！）",
+      "（饿的时候，连玩具都想咬一口…）","（饭盆饭盆，你在哪里…）",
+      "（主人，我闻到了……好吃的味道吗？）","（肚子扁扁的，好想吃…）",
+      "（谁能给我一根骨头呀…）","（饿着肚子摇尾巴，好难…）",
+      "（开饭开饭，迫不及待！）","（我的肚子在打鼓啦…）",
+      "（什么时候才能吃饭呀…）","（饿到想啃地板了…啊不行，地板不好吃！）",
+      "（肚子空空的，眼睛直勾勾…）","（我已经准备好干饭姿势啦！）",
+      "（闻到一丁点香味我都会竖起耳朵…）","（饿饿，饭饭，汪汪！）",
+      "（我的胃和我的心都在喊你啦…）"])
+      : need === "bath" ? AI.take([
+      "（身上有点痒痒的…）","（好像该洗个香香澡了…）",
+      "（毛有点打结了，想洗澡…）","（我闻到我自己该洗澡了…）",
+      "（毛有点灰灰的，该洗啦…）","（洗澡水什么时候放好呀…）",
+      "（身上有小灰尘，痒痒的…）","（想在水里扑腾扑腾…）",
+      "（毛都不蓬了，该洗澡啦…）","（浴室传来香香的味道就好了…）",
+      "（该做一只干净小狗啦…）","（爪子有点脏，想洗洗…）",
+      "（毛打结了，梳不开，只能洗啦…）","（想闻闻沐浴露的味道…）",
+      "（该洗香香了，我是精致小狗！）","（身上粘了灰，要洗白白…）",
+      "（洗个澡，毛就蓬蓬的啦…）","（该做个香香甜甜的小狗啦…）",
+      "（脏脏的，我自己都嫌弃啦…）","（洗澡时间到，可惜你不在…）",
+      "（毛尖都打柳啦，该泡个澡…）","（想扑进香香的泡泡里…）",
+      "（我感觉自己有点灰扑扑的…）","（洗香香之后才配被摸摸头…）",
+      "（水花四溅的快乐，谁懂…）"])
+      : need === "sleep" ? AI.take([
+      "（好困好困…想睡觉了…）","（眼皮在打架了…）",
+      "（今天的精力用完啦，想打盹…）","（呼…脑袋一点一点的…）",
+      "（好想找个软软的地方躺下…）","（困意来袭，挡不住啦…）",
+      "（眼睛快睁不开啦…）","（打个哈欠…好困…）",
+      "（想蜷成一团睡一觉…）","（今天的活动量够了，该睡了…）",
+      "（呼…站着都要睡着啦…）","（想听着你的声音睡觉…）",
+      "（困得尾巴都不想摇了…）","（找个舒服的姿势睡觉去…）",
+      "（晚安的前奏是困困的…）","（眼皮好重，快撑不住啦…）",
+      "（想睡觉，梦里见你…）","（呼…好想窝在你身边睡…）",
+      "（困困的，想打盹了…）","（精力余额不足，请及时休息…）",
+      "（哈——欠——，好想睡…）","（世界开始模糊了…）",
+      "（数羊都数不动了…）","（周公在召唤我…）",
+      "（呼…今天的觉格外香…）"])
+      : AI.take([
+      "（一个人待着有点无聊…）","（想找人一起玩…）",
+      "（什么时候能再见到你呀…）","（有点想你，有点孤单…）","（陪我玩一会儿嘛…）",
+      "（玩具都玩腻了，想和你玩…）","（好无聊，谁来陪我跑一圈…）",
+      "（想玩球球，球球在等我…）","（我自己转圈圈，还是想找你…）",
+      "（屋子好安静，想要热闹…）","（你什么时候回来一起玩呀…）",
+      "（想玩捉迷藏，你来藏…）","（我的精力没处释放啦…）",
+      "（想和你玩拔河…）","（无聊到数地板缝了…）",
+      "（谁来跟我玩一会儿…）","（想疯跑一圈，但你不在…）",
+      "（自己玩没意思，要你陪…）","（玩具们都在等我宠幸…）",
+      "（好想有人跟我玩飞盘…）","（这个家好安静，缺个玩伴…）",
+      "（我盯着门看了好久了…）","（想玩你丢我捡的游戏…）",
+      "（我的尾巴都无聊得不动了…）","（今天也想和你疯玩一场…）"]);
+    say(need === "food" ? pick(["汪…","汪呜…"]) : "汪…", thought);
+  } else if(Math.random() < .5){
+    var amb = AI.take([
+      "（今天也要一起玩哦！）","（尾巴已经控制不住啦！）",
+      "（有你在真好呀！）","（我在等你，一直都会在～）",
+      "（" + flv().idle[0] + "，今天也元气满满！）",
+      "（窗外好像有小鸟，去看看？）",
+      "（我的" + flv().tail + "，根本停不下来！）",
+      "（房间里每一块地板我都踩过啦～）",
+      "（要是现在有根磨牙棒就好了…）",
+      "（阳光正好，晒得我暖洋洋的～）","（今天也要元气满满！）",
+      "（闻到了一阵好闻的风～）","（我的玩具们都很乖，今天没乱跑！）",
+      "（你在的时候，连空气都是甜的～）","（我刚刚打了个盹，做了个好梦！）",
+      "（今天也是想和你贴贴的一天！）","（我好像听到了什么动静…是错觉吗？）",
+      "（毛茸茸的我，今天也很精神！）","（地板有点凉，但心是暖的～）",
+      "（要是能跟你分享这朵云就好了…）","（我在练习一个新表情，快看！）",
+      "（今天的我也很乖哦！）","（尾巴摇一摇，快乐没烦恼～）",
+      "（听说晒太阳可以长高高！）","（咦，我好像听到你的名字了…）",
+      "（今天的风里有你的味道～）","（我刚刚对着影子玩了一会儿！）",
+      "（要是有一根骨头从天而降就好了…）","（我在想晚饭会是什么…）",
+      "（家里的每个角落我都巡逻过啦！）","（嘿嘿，我发现自己又长大了一点点！）"
+    ]);
+    say("汪汪！", amb);
+  }
+}
+
+<!-- ============ 动画系统与界面路由 ============ -->
+var FRAME_IDS = ["idle","run-1","run-2","run-3","walk-1","walk-2","lie","sleep","jump-1","jump-2","jump-3","chew","eat-bone","eat-food","eat-can","eat-snack","happy","sad","angry"];
+function buildDogBox(){
+  var box = $("dogBox"); box.innerHTML = "";
+  var d = stats.dog, p = "assets/" + d + "/";
+  var defs = {
+    "idle":   "assets/select-" + d + ".png",
+    "run-1":  p+"run-01.png", "run-2": p+"run-02.png", "run-3": p+"run-03.png",
+    "walk-1": p+"walk-01.png", "walk-2": p+"walk-02.png",
+    "lie":    p+"lie-01.png", "sleep": p+"sleep-01.png",
+    "jump-1": p+"jump-01.png", "jump-2": p+"jump-02.png", "jump-3": p+"jump-03.png",
+    "chew":   p+"chew-01.png",
+    "eat-bone":  p+"eat-bone.png", "eat-food": p+"eat-food.png",
+    "eat-can":   p+"eat-can.png",  "eat-snack": p+"eat-snack.png",
+    "happy":  p+"expr-happy.png", "sad": p+"expr-sad.png", "angry": p+"expr-angry.png"
+  };
+  FRAME_IDS.forEach(function(k){
+    var img = document.createElement("img");
+    img.id = "f-" + k;
+    img.src = defs[k];
+    img.className = "hidden";
+    img.alt = k;
+    box.appendChild(img);
+  });
+}
+function showFrames(ids){
+  var box = $("dogBox"), imgs = box.getElementsByTagName("img");
+  for(var i=0;i<imgs.length;i++){
+    imgs[i].className = (ids.indexOf(imgs[i].id) >= 0) ? "active" : "hidden";
+  }
+}
+function setBreath(cls){
+  var box = $("dogBox");
+  box.classList.remove("breathe","breathe-soft","air");
+  if(cls) box.classList.add(cls);
+}
+
+function doIdle(noSay){
+  state.act = "idle";
+  clearTimers();
+  setBreath("breathe");
+  showFrames(["f-" + moodExpr()]);
+  if(!noSay && Math.random() < .5) autoBark();
+}
+function doRun(){
+  state.act = "run";
+  clearTimers();
+  setBreath(null);
+  var i = 0;
+  showFrames(["f-run-1"]);
+  state.timers.push(setInterval(function(){
+    i = (i % 3) + 1;
+    showFrames(["f-run-" + i]);
+  }, 130));
+}
+function frameOk(id){
+  var el = $(id);
+  return !!(el && el.complete && el.naturalWidth > 0);
+}
+function doWalk(){
+  state.act = "walk";
+  clearTimers();
+  setBreath(null);
+  var useRun = !frameOk("f-walk-1");   // 散步帧未就位时以慢速奔跑兜底
+  var ms = useRun ? 200 : 340;         // 散步两帧交替：每帧 340ms，步态轻缓
+  var i = 0;
+  showFrames(useRun ? ["f-run-1"] : ["f-walk-1"]);
+  state.timers.push(setInterval(function(){
+    i = useRun ? ((i % 3) + 1) : ((i % 2) + 1);   // 散步两帧循环 walk-1↔walk-2，兜底奔跑仍三帧
+    showFrames(useRun ? ["f-run-" + i] : ["f-walk-" + i]);
+  }, ms));
+}
+function doJump(){
+  state.act = "jump";
+  clearTimers();
+  setBreath(null);
+  showFrames(["f-jump-1"]);
+  aiSay("jump");
+  state.timers.push(setTimeout(function(){
+    var air = $("f-jump-2");
+    air.classList.add("active","jump-air");
+    $("f-jump-1").className = "hidden";
+    $("dogBox").classList.add("air");
+  }, 380));
+  state.timers.push(setTimeout(function(){
+    $("f-jump-2").className = "hidden";
+    $("dogBox").classList.remove("air");
+    showFrames(["f-jump-3"]);
+  }, 820));
+  state.timers.push(setTimeout(function(){ doIdle(true); }, 1400));
+}
+function doLie(){
+  state.act = "lie";
+  clearTimers();
+  setBreath("breathe-soft");
+  showFrames(["f-lie"]);
+  aiSay("lie");
+}
+function doSleep(){
+  state.act = "sleep";
+  clearTimers();
+  setBreath("breathe-soft");
+  showFrames(["f-sleep"]);
+  aiSay("sleep");
+}
+function doChew(){
+  state.act = "chew";
+  clearTimers();
+  setBreath("breathe-soft");
+  showFrames(["f-chew"]);
+  aiSay("chew");
+}
+var EAT_FRAME = {bone:"eat-bone", food:"eat-food", can:"eat-can", snack:"eat-snack"};
+function doEat(key){
+  var fid = EAT_FRAME[key] || "eat-snack";
+  state.act = "eat";
+  clearTimers();
+  setBreath("breathe-soft");
+  if(!frameOk("f-" + fid)) fid = "happy";   // 该犬种暂无吃食立绘时回退开心表情，避免空白
+  showFrames(["f-" + fid]);
+  aiSay("feed", {food:key});
+  state.timers.push(setTimeout(function(){ doIdle(true); }, 3200));
+}
+
+/* ---------- 自主活动（八向散步 / 小跑，按速度切换动画；散步·趴下·睡觉均为待机事件） ---------- */
+var move = { on:false, x:0, y:0, tx:0, ty:0, groundY:0, speed:0, mode:"walk", facing:1, raf:0, lastT:0 };
+var ROAM = { minX:0.08, maxX:0.92, minG:0.53, maxG:0.92, walkSpd:60, runSpd:165 };
+var SLEEP_HOUR_START = 23, SLEEP_HOUR_END = 5, WAKE_GRACE = 90000;
+var OFFLINE_REGEN = 0.02;   // 离线休息时精力恢复速率（/秒），比趴下待机慢，8 小时约回满
+
+function wrapSize(){
+  var r = $("dogBox").getBoundingClientRect();
+  return {w:r.width, h:r.height};
+}
+function dogPos(){
+  var s = sceneSize();
+  var r = $("dogWrap").getBoundingClientRect();
+  return {x: r.left - s.left + r.width/2, y: r.top - s.top + r.height/2};
+}
+function setWrap(x, y){
+  $("dogWrap").style.transform = "translate(" + x + "px," + y + "px) scaleX(" + move.facing + ")";
+  /* 对话框始终跟随小狗，悬在其头顶 */
+  var b = $("bubble");
+  var bw = $("dogBox").getBoundingClientRect().width || 120;
+  var s = sceneSize();
+  var bx = clamp(x + bw/2, 90, Math.max(90, s.w - 90));
+  var by = Math.max(8, y - 78);
+  b.style.left = bx + "px";
+  b.style.top = by + "px";
+}
+function startMove(cx, gy, mode){
+  var w = wrapSize(), s = sceneSize();
+  gy = clamp(gy, s.h*ROAM.minG, s.h*ROAM.maxG);
+  move.groundY = gy;
+  var tx = clamp(cx - w.w/2, 0, Math.max(0, s.w - w.w));
+  var ty = gy - w.h;
+  // 起点为当前位置（由 initPos/上一次移动维护），目标是 tx/ty——逐步走过去而不是瞬移
+  move.tx = tx; move.ty = ty;
+  move.mode = mode;
+  move.speed = mode === "run" ? ROAM.runSpd : ROAM.walkSpd;
+  move.facing = (cx >= (move.x + w.w/2)) ? -1 : 1;   // 素材默认头朝左：向右走时翻转朝右
+  move.on = true;
+  move.lastT = performance.now();   // 每段移动都以当前时刻为基准，避免沿用旧时间戳导致步长失真
+  setWrap(move.x, move.y);
+  // 移动即切换对应动画：跑用奔跑帧、走用散步帧，避免趴着/跳跃等姿态"滑行"
+  if(mode === "run") doRun(); else doWalk();
+  if(!move.raf){ move.raf = requestAnimationFrame(moveTick); }
+}
+function stopMove(){
+  move.on = false;
+  if(move.raf){ cancelAnimationFrame(move.raf); move.raf = 0; }
+  if(state.act === "run" || state.act === "walk") doIdle(true);
+}
+function moveTick(now){
+  move.raf = 0;
+  var dt = Math.min((now - move.lastT)/1000, .05);
+  move.lastT = now;
+  if(move.on){
+    var dx = move.tx - move.x, dy = move.ty - move.y;
+    var dist = Math.sqrt(dx*dx + dy*dy);
+    var step = move.speed * dt;
+    if(dist <= step || dist === 0){
+      move.x = move.tx; move.y = move.ty;
+      move.on = false;
+      if(state.act === "walk" || state.act === "run") doIdle(true);   // 到达即静止：避免"贴图在走但位置已停"的踏步态
+    } else {
+      move.x += dx/dist*step;
+      move.y += dy/dist*step;
+      if(Math.abs(dx) > 1) move.facing = dx > 0 ? -1 : 1;   // 向右走朝右（翻转），向左走朝左
+    }
+    setWrap(move.x, move.y);
+    if(state.act === "idle" || state.act === "run" || state.act === "walk"){
+      var want = move.mode === "run" ? "run" : "walk";
+      if(state.act !== want){ if(want === "run") doRun(); else doWalk(); }
+    }
+    if(!move.on){
+      if(ball.mode === "chase"){ chaseKnock(); }
+      else idleAfterArrive();
+    }
+  }
+  if(move.on) move.raf = requestAnimationFrame(moveTick);
+}
+function scheduleRoam(delay, force){
+  if(state.roamT) clearTimeout(state.roamT);
+  state.roamT = setTimeout(function(){
+    /* 任一跳过调度的场景都先清掉走/跑残留动画，避免原地踏步（贴图走、位置停） */
+    if(state.sleeping){ if(state.act === "walk" || state.act === "run") doIdle(true); return; }
+    if(!force && state.act !== "idle") return;
+    if($("toyLayer").children.length){ if(state.act === "walk" || state.act === "run") doIdle(true); return; }  // 有玩具在玩时不自走
+    if(document.querySelector(".mask.on")){ if(state.act === "walk" || state.act === "run") doIdle(true); return; } // 弹层打开时不打扰
+    var s = sceneSize(), w = wrapSize();
+    /* 触边自动转向（左右 + 上下）：当前位置靠近哪一侧，下一个目标点就强制偏向反方向，避免一直冲着一个方向撞 */
+    var cxc = (move.x + w.w/2) / s.w;   // 当前中心横向比例 0~1
+    var gyc = move.groundY / s.h;       // 当前深度比例 0~1（越小越靠上/远处）
+    var minX = cxc < 0.35 ? 0.40 : ROAM.minX;              // 靠近左缘 → 目标明显向右
+    var maxX = cxc > 0.65 ? 0.60 : ROAM.maxX;              // 靠近右缘 → 目标明显向左
+    minX = Math.max(minX, 0.18);                           // 目标永远离墙 ≥18%，不走向墙根
+    maxX = Math.min(maxX, 0.82);
+    var minG = gyc < 0.62 ? Math.max(ROAM.minG, gyc + 0.08) : ROAM.minG;  // 靠近上缘 → 强制往下走
+    var maxG = gyc > 0.78 ? Math.min(ROAM.maxG, gyc - 0.08) : ROAM.maxG;  // 靠近下缘 → 强制往上走
+    var cx = s.w * (minX + Math.random()*(maxX - minX));
+    var gy = s.h * (minG + Math.random()*(maxG - minG));
+    /* 防原地踏步：目标点距当前位置太近时，直接跳到对侧区域，保证每段都有明显移动 */
+    var cxp = move.x + w.w/2, gyp = move.groundY;
+    var MIN_DIST = s.w * 0.10;   // 最小移动距离：屏幕宽 10%
+    var d = Math.sqrt(Math.pow(cx - cxp, 2) + Math.pow(gy - gyp, 2));
+    if(d < MIN_DIST){
+      var toRight = cxp < s.w * 0.5;
+      cx = s.w * (toRight ? 0.55 + Math.random()*0.27 : 0.18 + Math.random()*0.27);   // 对侧中段，不贴墙
+      gy = s.h * (0.55 + Math.random()*0.30);
+      d = Math.sqrt(Math.pow(cx - cxp, 2) + Math.pow(gy - gyp, 2));
+    }
+    var mode = (Math.random() < 0.22 && d > s.w*0.2) ? "run" : "walk";
+    startMove(cx, gy, mode);
+  }, delay == null ? 600 + Math.random()*2200 : delay);
+}
+function idleAfterArrive(){
+  var e = stats.energy;
+  /* 精力见底：一直趴着，直到精力恢复到 50% 以上再继续活动 */
+  if(e < 10){ lieRestUntil(50); return; }
+  /* 精力偏低：大幅提高趴下休息概率，休息更久以回精力 */
+  if(e < 30){
+    if(Math.random() < 0.45){
+      lieThenRoam(10000 + Math.random()*10000);  // 趴下休息 10-20 秒
+    } else {
+      doIdle(true);
+      scheduleRoam(1000 + Math.random()*1500);
+    }
+    return;
+  }
+  /* 精力正常：默认直接续走下一点（掉头不先进待机）；偶尔短暂停歇再走（走走停停） */
+  if(Math.random() < 0.12){
+    if(Math.random() < 0.2){
+      lieThenRoam(3000 + Math.random()*3000);   // 偶尔趴下休息 3-6 秒
+    } else {
+      doIdle(true);
+      scheduleRoam(1500 + Math.random()*2500);  // 站立小休 1.5-4 秒
+    }
+  } else {
+    scheduleRoam(20 + Math.random()*50, true);  // 不掉头不进待机：极短缓冲后直接续走（目标已强制偏向反方向）
+  }
+}
+/* 用户交互结束后随机进入某一待机动作，随后恢复走动：原地待机严格控制在 3-5 秒（精力正常时） */
+function postActionIdle(){
+  var e = stats.energy;
+  /* 精力见底：一直趴着，直到精力恢复到 50% 以上再继续活动 */
+  if(e < 10){ lieRestUntil(50); return; }
+  /* 精力偏低：提高趴下休息概率，休息更久以回精力 */
+  if(e < 30){
+    if(Math.random() < 0.45){
+      lieThenRoam(10000 + Math.random()*10000);  // 趴下休息 10-20 秒
+    } else {
+      doIdle(true);
+      scheduleRoam(3000 + Math.random()*2000);   // 站立小休 3-5 秒
+    }
+    return;
+  }
+  if(Math.random() < 0.2){
+    lieThenRoam(3000 + Math.random()*2000);   // 低概率趴下，3-5 秒后起身
+  } else {
+    doIdle(true);
+    scheduleRoam(3000 + Math.random()*2000);  // 站立小休 3-5 秒后继续走
+  }
+}
+function lieThenRoam(dur){
+  stopMove();
+  doLie();
+  if(state.roamT) clearTimeout(state.roamT);
+  state.roamT = setTimeout(function(){
+    if(state.sleeping) return;
+    if(state.act === "lie"){ doIdle(true); scheduleRoam(200 + Math.random()*600); }
+  }, dur);
+}
+/* 精力见底：一直趴着休息，直到精力恢复到 target 以上才恢复活动 */
+function lieRestUntil(target){
+  stopMove();
+  doLie();
+  if(state.roamT) clearTimeout(state.roamT);
+  var iv = setInterval(function(){
+    if(state.sleeping) return;                    // 夜间入睡后由睡眠恢复接管
+    if(stats.energy >= target){
+      clearInterval(iv);
+      if(state.act === "lie"){ doIdle(true); scheduleRoam(300 + Math.random()*500); }
+    }
+  }, 3000);
+  state.timers.push(iv);
+}
+function initPos(){
+  var s = sceneSize(), w = wrapSize();
+  /* 优先恢复存档位置（比例），避免刷新/切后台后重置回初始点 */
+  if(S.pos && S.pos.xr != null && S.pos.yr != null){
+    move.groundY = clamp(S.pos.yr * s.h, s.h * ROAM.minG, s.h * ROAM.maxG);
+    move.x = clamp(S.pos.xr * s.w - w.w/2, 0, Math.max(0, s.w - w.w));
+    move.y = move.groundY - w.h;
+    move.facing = S.pos.facing || 1;
+    setWrap(move.x, move.y);
+    return;
+  }
+  move.groundY = s.h * 0.60;
+  move.x = s.w/2 - w.w/2;
+  move.y = move.groundY - w.h;
+  move.facing = 1;
+  setWrap(move.x, move.y);
+}
+
+/* ---------- 自动作息：每天 23:00 自动入睡，5:00 自动醒来；点击/互动可唤醒，唤醒后无操作自动续睡 ---------- */
+function isNightNow(){
+  var h = new Date().getHours();
+  return h >= SLEEP_HOUR_START || h < SLEEP_HOUR_END;
+}
+function enterSleep(){
+  if(state.sleeping) return;
+  state.sleeping = true;
+  stopMove();
+  if(state.roamT){ clearTimeout(state.roamT); state.roamT = null; }
+  doSleep();
+  $("sleepHint").style.display = "block";
+  $("sleepHint").textContent = "轻触画面唤醒";
+  $("scene").addEventListener("click", wakeOnce);
+}
+function autoWake(){
+  if(!state.sleeping) return;
+  state.sleeping = false;
+  $("sleepHint").style.display = "none";
+  $("scene").removeEventListener("click", wakeOnce);
+  stopMove();
+  doIdle(true);
+  scheduleRoam(1200);
+}
+function wakeUp(){
+  if(!state.sleeping) return;
+  state.wakeGrace = Date.now() + WAKE_GRACE;
+  autoWake();
+  aiSay("wake");
+  postActionIdle();
+}
+function wakeOnce(){
+  wakeUp();
+}
+function checkAutoSleep(){
+  if(!$("view-main").classList.contains("on")) return; // 非主界面不自动睡
+  if(document.querySelector(".mask.on")) return;        // 弹层打开时不自动睡
+  if($("toyLayer").children.length) return;             // 玩玩具中不自动睡
+  var night = isNightNow();
+  if(night && !state.sleeping && (state.act === "idle" || state.act === "lie") && Date.now() > (state.wakeGrace || 0)){
+    enterSleep();
+  } else if(!night && state.sleeping){
+    autoWake();
+  }
+}
+
+/* ---------- 视图路由 ---------- */
+function showView(id){
+  document.querySelectorAll(".view").forEach(function(v){ v.classList.remove("on"); });
+  $(id).classList.add("on");
+}
+function buildSelect(){
+  var g = $("dogGrid"); g.innerHTML = "";
+  Object.keys(DOGS).forEach(function(k){
+    var card = document.createElement("div");
+    card.className = "dog-card";
+    var img = document.createElement("img");
+    img.src = "assets/select-" + k + ".png";
+    img.alt = DOGS[k].name;
+    var nm = document.createElement("div"); nm.className = "name"; nm.textContent = DOGS[k].name;
+    var gr = document.createElement("div"); gr.className = "growth"; gr.textContent = DOGS[k].growth;
+    card.appendChild(img); card.appendChild(nm); card.appendChild(gr);
+    card.addEventListener("click", function(){
+      stats.dog = k;
+      S.dog = k; save();
+      showView("view-name");
+      $("nameDogImg").src = "assets/select-" + k + ".png";
+      $("nameInput").value = DOGS[k].name;
+      $("nameInput").focus();
+    });
+    g.appendChild(card);
+  });
+}
+function initName(){
+  function confirm(){
+    var nm = $("nameInput").value.trim();
+    if(!nm) nm = DOGS[stats.dog].name;
+    /* 新领养：数值与成长天数全部回到初始 */
+    stats.hunger = 100; stats.clean = 100; stats.mood = 100; stats.energy = 100; stats.health = 100;
+    S.ageDays = 0;
+    S.name = nm;
+    S.firstSeen = false;
+    save();
+    showView("view-main");
+    buildDogBox(); initPos(); renderBars(); renderAvatar();
+    aiSay("adopt", {name: nm});
+    postActionIdle();
+  }
+  $("nameOk").addEventListener("click", confirm);
+  $("nameInput").addEventListener("keydown", function(ev){
+    if(ev.key === "Enter") confirm();
+  });
+}
+function enterFlow(){
+  if(!S.firstSeen){
+    showView("view-main");
+    stats.dog = S.dog || "samoyed";
+    buildDogBox(); initPos(); renderBars(); renderAvatar();
+    aiSay("greet");
+    postActionIdle();
+    return;
+  }
+  showView("view-select");
+}
+function initRouting(){
+  $("view-logo").addEventListener("click", function(){
+    showView("view-select");
+    buildSelect();
+  });
+}
+
+<!-- ============ 交互系统 ============ -->
+function toast(t){
+  var b = $("bubble");
+  $("bw").textContent = ""; $("bm").textContent = t;
+  b.classList.remove("show"); void b.offsetWidth; b.classList.add("show");
+  if(state.bubbleTimer) clearTimeout(state.bubbleTimer);
+  state.bubbleTimer = setTimeout(function(){ b.classList.remove("show"); }, 2200);
+}
+
+/* ---------- 弹层 ---------- */
+function openMask(id){ $(id).classList.add("on"); }
+function closeMask(id){
+  $(id).classList.remove("on");
+  /* 关闭弹层后：若小狗正静止待机且无其他占用，恢复自主走动（弹层打开期间被跳过的调度在此补上） */
+  if($("view-main").classList.contains("on") && !state.sleeping && !$("toyLayer").children.length
+     && state.act === "idle" && !move.on){
+    scheduleRoam(300 + Math.random()*600);
+  }
+}
+function buildOptionGrid(gridId, items, onClick){
+  var g = $(gridId); g.innerHTML = "";
+  items.forEach(function(it){
+    var o = document.createElement("div");
+    o.className = "opt";
+    var ico = document.createElement("div");
+    ico.className = "ico " + it.cls;
+    ico.textContent = it.letter || "";
+    var t = document.createElement("div"); t.className = "t"; t.textContent = it.label;
+    var d = document.createElement("div"); d.className = "d"; d.textContent = it.desc || "";
+    o.appendChild(ico); o.appendChild(t); if(it.desc) o.appendChild(d);
+    o.addEventListener("click", function(){ onClick(it); });
+    g.appendChild(o);
+  });
+}
+
+/* ---------- 喂食 ---------- */
+function initFeed(){
+  buildOptionGrid("feedGrid", Object.keys(FEEDS).map(function(k){
+    var f = FEEDS[k];
+    return {label:f.label, cls:f.cls, desc:"+" + f.gain + " 饱食", letter:(f.label[0])};
+  }), function(it){
+    var key = Object.keys(FEEDS).filter(function(k){ return FEEDS[k].label === it.label; })[0];
+    var f = FEEDS[key];
+    if(state.sleeping) wakeUp();
+    stopMove();
+    stats.hunger = clamp(stats.hunger + f.gain, 0, 100);
+    stats.mood   = clamp(stats.mood + f.mood, 0, 100);
+    renderBars(); save();
+    closeMask("maskFeed");
+    doEat(key);
+  });
+}
+
+/* ---------- 洗澡 ---------- */
+function initBath(){
+  buildOptionGrid("bathGrid", SOAPS.map(function(s, i){
+    return {label:s.label, cls:s.cls, desc:"", letter:["花","桃","草","奶"][i]};
+  }), function(it){
+    var soap = SOAPS.filter(function(s){ return s.label === it.label; })[0];
+    if(state.sleeping) wakeUp();
+    stopMove();
+    stats.clean = clamp(stats.clean + 45, 0, 100);
+    stats.mood  = clamp(stats.mood + 4, 0, 100);
+    renderBars(); save();
+    closeMask("maskBath");
+    var likeChance = 0.35 + stats.mood / 100 * 0.5;
+    var like = Math.random() < likeChance;
+    aiSay("bath", {soap:soap, like:like});
+    postActionIdle();
+  });
+}
+
+/* ---------- 玩耍：球 ---------- */
+var ball = { el:null, x:0, y:0, groundY:0, size:56, mode:"rally", busy:false, knockN:0, settleT:null };
+
+function sceneSize(){
+  var r = $("scene").getBoundingClientRect();
+  return {w:r.width, h:r.height, left:r.left, top:r.top};
+}
+/* dogPos 已移至自主活动模块（返回小狗实时位置） */
+function ballScale(y){
+  var s = sceneSize();
+  return 0.6 + 0.4 * clamp((s.h - y) / s.h, 0, 1);   // 越靠近底部（用户侧）越大
+}
+function applyBall(){
+  var sc = ballScale(ball.y);
+  ball.el.style.width = ball.size * sc + "px";
+  ball.el.style.height = ball.size * sc + "px";
+  ball.el.style.left = (ball.x - ball.size * sc / 2) + "px";
+  ball.el.style.top = (ball.y - ball.size * sc / 2) + "px";
+  var sh = ball.el.querySelector(".ball-shadow");
+  var hf = clamp((ball.groundY - ball.y) / (ball.groundY * 0.5), 0, 1);  // 离地比例
+  sh.style.left = (ball.size * sc / 2) + "px";
+  sh.style.top = (ball.groundY - ball.y) + (ball.size * sc / 2) + "px";
+  sh.style.opacity = 1 - hf * 0.7;
+  sh.style.transform = "translate(-50%,-50%) scale(" + (1 - hf * 0.4) + ")";
+}
+function flyBall(to, dur, cb){
+  var from = {x: ball.x, y: ball.y};
+  var peak = Math.min(from.y, to.y) - Math.abs(to.x - from.x) * 0.28;
+  var t0 = performance.now();
+  function step(now){
+    var p = clamp((now - t0) / dur, 0, 1);
+    var e = p < .5 ? 2*p*p : 1 - Math.pow(-2*p+2, 2)/2;
+    ball.x = from.x + (to.x - from.x) * e;
+    ball.y = from.y + (to.y - from.y) * e + (peak - Math.min(from.y,to.y)) * 4 * e * (1 - e);
+    applyBall();
+    if(p < 1) requestAnimationFrame(step);
+    else if(cb) cb();
+  }
+  requestAnimationFrame(step);
+}
+function dropBall(){
+  stopMove();
+  var s = sceneSize();
+  ball.x = s.w * (0.06 + Math.random()*0.88);   // 扩张：整个地板宽度
+  ball.groundY = s.h * (0.54 + Math.random()*0.38); // 扩张：整个地板深度
+  ball.y = ball.groundY;
+  ball.size = 56;
+  ball.mode = "rally";
+  ball.knockN = 0;
+  ball.el.style.width = ball.size + "px";
+  ball.el.style.height = ball.size + "px";
+  applyBall();
+  ball.el.classList.add("toy-drop");
+  setTimeout(function(){ ball.el.classList.remove("toy-drop"); }, 600);
+  aiSay("ballDrop");
+}
+function ballToDog(){
+  if(ball.busy) return;
+  ball.busy = true;
+  stopMove();
+  var d = dogPos();
+  aiSay("ballGo");
+  flyBall({x:d.x, y:d.y - 40}, 620, function(){
+    // 小狗顶回
+    doJump();
+    setTimeout(function(){
+      var s = sceneSize();
+      var target = {x: s.w * (0.06 + Math.random()*0.88), y: s.h * (0.54 + Math.random()*0.38)};
+      flyBall(target, 700, function(){
+        ball.busy = false;
+        stats.energy = clamp(stats.energy - 2.5, 0, 100);
+        stats.mood   = clamp(stats.mood + 4, 0, 100);
+        stats.hunger = clamp(stats.hunger - 1, 0, 100);
+        stats.clean  = clamp(stats.clean - 1, 0, 100);
+        renderBars(); save();
+        if(ball.mode === "rally") armSettle();
+      });
+    }, 500);
+  });
+}
+function armSettle(){
+  if(ball.settleT) clearTimeout(ball.settleT);
+  ball.settleT = setTimeout(function(){
+    if(ball.mode !== "rally" || ball.busy) return;
+  aiSay("ballSettle");
+    if(ball.el){ ball.el.remove(); ball.el = null; }   // 真正移除球，避免残留阻塞自主走动
+    postActionIdle();
+  }, 6000);
+}
+function chaseKnock(){
+  var s = sceneSize();
+  var tx = s.w * (0.06 + Math.random()*0.88);          // 横向全随机
+  var tgy = s.h * (0.54 + Math.random()*0.38);         // 纵深全随机（小狗活动范围）
+  var peakH = 30 + Math.random() * 50;
+  var from = {x: ball.x, y: ball.y, gy: ball.groundY};
+  var t0 = performance.now();
+  function step(now){
+    var p = clamp((now - t0) / 520, 0, 1);
+    ball.x = from.x + (tx - from.x) * p;
+    ball.y = ball.groundY - peakH * 4 * p * (1 - p);
+    ball.groundY = from.gy + (tgy - from.gy) * p;      // 影子深度随球平滑过渡到新落点
+    applyBall();
+    if(p < 1) requestAnimationFrame(step);
+    else { ball.knockN++; chaseStep(); }
+  }
+  requestAnimationFrame(step);
+}
+function chaseStep(){
+  if(ball.mode !== "chase") return;
+  if(ball.knockN >= 6){ endChase(); return; }
+  stopMove();
+  startMove(ball.x, ball.groundY, "run");   // 狗追到球的深度位置，视觉更贴近球
+  if(state.act !== "run") doRun();
+}
+function endChase(){
+  ball.mode = "idle";
+  stopMove();
+  doIdle(true);
+  stats.energy = clamp(stats.energy - 8, 0, 100);
+  stats.mood   = clamp(stats.mood + 10, 0, 100);
+  stats.hunger = clamp(stats.hunger - 3, 0, 100);
+  stats.clean  = clamp(stats.clean - 3, 0, 100);
+  renderBars(); save();
+  aiSay("chaseEnd");
+  postActionIdle();
+  setTimeout(function(){ if(ball.el){ ball.el.remove(); ball.el = null; } }, 2600);   // 真正移除球，避免残留阻塞自主走动
+}
+
+/* ---------- 玩耍：磨牙棒 ---------- */
+function dropStick(){
+  /* 不掉落物品：点击后小狗直接在原地开始啃咬动作 */
+  doChew();
+  setTimeout(function(){
+    stats.energy = clamp(stats.energy + 8, 0, 100);
+    stats.hunger = clamp(stats.hunger + 10, 0, 100);
+    stats.mood   = clamp(stats.mood + 6, 0, 100);
+    stats.clean  = clamp(stats.clean - 4, 0, 100);
+    renderBars(); save();
+    aiSay("stickDone");
+    postActionIdle();
+  }, 6000);
+}
+
+/* ---------- 玩耍入口 ---------- */
+function initPlay(){
+  buildOptionGrid("playGrid", [
+    {label:"小球", cls:"ico-ball", desc:"点击拍球 / 拖拽追球", letter:"球"},
+    {label:"磨牙棒", cls:"ico-stick", desc:"咔嚓咔嚓", letter:"棒"}
+  ], function(it){
+    closeMask("maskPlay");
+    if(it.label === "小球"){
+      if(state.sleeping) wakeUp();
+      stopMove();
+      if(ball.el) ball.el.remove();
+      ball.el = document.createElement("div");
+      ball.el.className = "toy ball";
+      var sh = document.createElement("div"); sh.className = "ball-shadow";
+      ball.el.appendChild(sh);
+      $("toyLayer").appendChild(ball.el);
+      dropBall();
+      armSettle();
+      // 点击：拍向小狗
+      ball.el.addEventListener("click", function(ev){
+        ev.stopPropagation();
+        if(ball.mode === "rally") ballToDog();
+      });
+      // 拖拽：小狗追球（区分点按与拖拽）
+      var drag = null;
+      ball.el.addEventListener("pointerdown", function(ev){
+        if(ball.busy || ball.mode === "chase") return;
+        if(ball.settleT){ clearTimeout(ball.settleT); ball.settleT = null; }
+        drag = {id: ev.pointerId, moved:false};
+        ball.el.setPointerCapture(ev.pointerId);
+        ev.preventDefault();
+      });
+      ball.el.addEventListener("pointermove", function(ev){
+        if(!drag || ev.pointerId !== drag.id) return;
+        if(Math.abs(ev.movementX) + Math.abs(ev.movementY) > 2) drag.moved = true;
+        var s = sceneSize();
+        ball.x = clamp(ev.clientX - s.left, 20, s.w - 20);
+        ball.y = clamp(ev.clientY - s.top, s.h*0.2, s.h*0.92);          // 扩张：允许拖到整个地板高度
+        ball.groundY = clamp(ev.clientY - s.top, s.h*0.54, s.h*0.92);   // 扩张：地面跟随拖动深度
+        applyBall();
+      });
+      ball.el.addEventListener("pointerup", function(ev){
+        if(!drag || ev.pointerId !== drag.id) return;
+        var moved = drag.moved;
+        drag = null;
+        if(!moved) return;           // 纯点按交给 click 拍球
+        ball.mode = "chase";
+        ball.knockN = 0;
+        chaseStep();
+      });
+    } else {
+      if(state.sleeping) wakeUp();
+      stopMove();
+      if(state.act === "chew"){ aiSay("chewBusy"); return; }
+      if(ball.el){ ball.el.remove(); ball.el = null; }
+      dropStick();
+    }
+  });
+}
+
+/* ---------- 睡觉：已改为自动作息事件（见自主活动模块 checkAutoSleep） ---------- */
+
+/* ---------- 抚摸：点击小狗随机触发对话并增加心情 ---------- */
+var petLast = 0;
+function initPet(){
+  $("dogBox").addEventListener("click", function(ev){
+    ev.stopPropagation();
+    var now = Date.now();
+    if(now - petLast < 3500) return;      // 冷却 3.5 秒，防止连点刷心情
+    petLast = now;
+    if(state.sleeping) wakeUp();
+    if(state.act === "chew"){             // 啃咬中只回应不打断
+      stats.mood = clamp(stats.mood + 2, 0, 100);
+      renderBars(); save();
+      aiSay("pet");
+      return;
+    }
+    stopMove();
+    stats.mood = clamp(stats.mood + 4, 0, 100);
+    renderBars(); save();
+    aiSay("pet");
+    setBreath(null);
+    showFrames(["f-happy"]);              // 短暂展示开心表情作为抚摸反馈
+    state.timers.push(setTimeout(function(){
+      doIdle(true);
+      scheduleRoam(900 + Math.random()*900);
+    }, 1600));
+  });
+}
+
+/* ---------- 数值流逝 ---------- */
+function tickDecay(){
+  stats.hunger = clamp(stats.hunger - DECAY_PER_SEC, 0, 100);
+  stats.clean  = clamp(stats.clean  - DECAY_PER_SEC, 0, 100);
+  stats.mood   = clamp(stats.mood   - DECAY_PER_SEC, 0, 100);
+  stats.energy = clamp(stats.energy - DECAY_PER_SEC, 0, 100);
+  var low = stats.hunger < STAT_MIN || stats.clean < STAT_MIN || stats.mood < STAT_MIN || stats.energy < STAT_MIN;
+  stats.health = clamp(stats.health + (low ? -HEALTH_DROP : HEALTH_REGEN), 0, 100);
+  if(state.sleeping) stats.energy = clamp(stats.energy + 0.8, 0, 100);
+  else if(state.act === "lie") stats.energy = clamp(stats.energy + 0.15, 0, 100); // 趴下待机也缓慢回精力
+  checkAutoSleep();
+  renderBars();
+}
+
+/* ---------- BGM ---------- */
+var bgm = null, bgmOn = false;
+function initBgm(){
+  bgm = document.createElement("audio");
+  bgm.loop = true;
+  var vol = clamp(parseInt(localStorage.getItem("doubao_pet_bgm_vol") || "60", 10), 0, 100);
+  bgm.volume = vol / 100;
+  bgm.addEventListener("error", function(){
+    if(bgmOn){ toast("未找到本地 BGM，请将音乐放入 assets/bgm/bgm.mp3"); bgmOn = false; }
+  });
+  $("bgmBtn").addEventListener("click", function(){
+    if(bgmOn){ bgm.pause(); bgmOn = false; return; }
+    bgm.src = "assets/bgm/bgm.mp3";
+    var p = bgm.play();
+    if(p && p.catch){ p.catch(function(){ toast("BGM 播放失败"); bgmOn = false; }); }
+    bgmOn = true;
+  });
+}
+
+/* ---------- 设置：主题 / BGM 音量 / 三次确认重置 ---------- */
+var THEMES = [
+  {id:"sky",   name:"蓝墙米地", css:"linear-gradient(135deg,#A9C9E6 0%,#F7E3BA 100%)"},
+  {id:"pink",  name:"粉色小屋", css:"linear-gradient(135deg,#F4B8D0 0%,#F8E2E6 100%)"},
+  {id:"grass", name:"青草花园", css:"linear-gradient(135deg,#B7D8A8 0%,#CBE5B2 100%)"},
+  {id:"dusk",  name:"暖橙黄昏", css:"linear-gradient(135deg,#F3C4A5 0%,#F6D3AC 100%)"},
+  {id:"starry",name:"星空之夜", css:"linear-gradient(135deg,#18234A 0%,#454A6B 100%)"}
+];
+function applyTheme(){
+  $("scene").setAttribute("data-theme", S.theme || "sky");
+  var row = $("themeRow");
+  Array.prototype.forEach.call(row.children, function(el){
+    el.classList.toggle("on", el.dataset.theme === (S.theme || "sky"));
+  });
+  syncStars();
+}
+/* 星空主题：在墙壁上生成/移除闪烁星星 */
+function syncStars(){
+  var wall = $("scene").querySelector(".wall");
+  var stars = wall.querySelectorAll(".star");
+  var starry = (S.theme || "sky") === "starry";
+  if(starry && stars.length === 0){
+    for(var i = 0; i < 36; i++){
+      var s = document.createElement("div");
+      s.className = "star";
+      s.style.left = (2 + Math.random()*96).toFixed(1) + "%";
+      s.style.top = (2 + Math.random()*86).toFixed(1) + "%";
+      var sz = (1.5 + Math.random()*2.6).toFixed(1);
+      s.style.width = sz + "px"; s.style.height = sz + "px";
+      s.style.animationDuration = (1.3 + Math.random()*2.4).toFixed(2) + "s";
+      s.style.animationDelay = (-Math.random()*3.5).toFixed(2) + "s";
+      wall.appendChild(s);
+    }
+  } else if(!starry && stars.length){
+    Array.prototype.forEach.call(stars, function(x){ x.remove(); });
+  }
+}
+function buildThemeRow(){
+  var row = $("themeRow"); row.innerHTML = "";
+  THEMES.forEach(function(t){
+    var s = document.createElement("div");
+    s.className = "theme-swatch";
+    s.dataset.theme = t.id;
+    s.title = t.name;
+    s.style.background = t.css;
+    s.addEventListener("click", function(){
+      S.theme = t.id; save(); applyTheme();
+    });
+    row.appendChild(s);
+  });
+  applyTheme();
+}
+var resetStep = 0, resetT = null;
+function initSet(){
+  $("setBtn").addEventListener("click", function(){ openMask("maskSet"); });
+  var vol = clamp(parseInt(localStorage.getItem("doubao_pet_bgm_vol") || "60", 10), 0, 100);
+  $("volSlider").value = vol; $("volVal").textContent = vol + "%";
+  $("volSlider").addEventListener("input", function(){
+    var v = clamp(parseInt(this.value, 10) || 0, 0, 100);
+    $("volVal").textContent = v + "%";
+    localStorage.setItem("doubao_pet_bgm_vol", v);
+    if(bgm) bgm.volume = v / 100;
+  });
+  buildThemeRow();
+  $("resetBtn").addEventListener("click", function(){
+    resetStep++;
+    if(resetT) clearTimeout(resetT);
+    resetT = setTimeout(function(){ resetStep = 0; $("resetBtn").textContent = "重置游戏"; }, 10000);
+    if(resetStep === 1){ $("resetBtn").textContent = "再点一次确认重置"; }
+    else if(resetStep === 2){ $("resetBtn").textContent = "最后确认！再点立即重置"; }
+    else { doReset(); }
+  });
+  $("redeemBtn").addEventListener("click", function(){
+    var v = ($("redeemInput").value || "").trim().toLowerCase();
+    if(v === "happybirthday"){
+      $("redeemInput").value = "";
+      $("redeemInput").placeholder = "输入兑换码";
+      openMask("maskLetter");
+    } else {
+      $("redeemInput").value = "";
+      $("redeemInput").placeholder = "兑换码不正确，再试试";
+    }
+  });
+  $("maskLetter").addEventListener("click", function(e){
+    if(e.target === this) closeMask("maskLetter");
+  });
+}
+/* 重置整个游戏：清存档并回到标题页重新领养。
+   直接在内存中重置所有状态并切换视图，不依赖页面刷新——避免打包环境下
+   localStorage 删除与重载的竞态导致刷新后仍回到小狗页面。 */
+function doReset(){
+  $("resetBtn").textContent = "重置游戏";
+  resetStep = 0;
+  localStorage.removeItem(LS_KEY);
+  try{ sessionStorage.clear(); }catch(e){}
+  clearTimers();
+  stopMove();
+  if(state.roamT){ clearTimeout(state.roamT); state.roamT = null; }
+  if(state.bubbleTimer){ clearTimeout(state.bubbleTimer); state.bubbleTimer = null; }
+  state.act = "idle"; state.expr = "happy";
+  state.sleeping = false; state.ballMode = null; state.ballBusy = false;
+  state.saveTimer = null; state.wakeGrace = 0;
+  stats = { hunger:100, clean:100, mood:100, energy:100, health:100, dog:"samoyed" };
+  S = { dog:"samoyed", stats:{hunger:100,clean:100,mood:100,energy:100,health:100},
+        lastSeen:Date.now(), firstSeen:true, ageDays:0, name:"", theme:"sky" };
+  $("toyLayer").innerHTML = "";
+  ball.el = null; ball.busy = false; ball.settleT = null; ball.knockN = 0;
+  document.querySelectorAll(".mask").forEach(function(m){ m.classList.remove("on"); });
+  $("sleepHint").style.display = "none";
+  $("scene").removeEventListener("click", wakeOnce);
+  var bub = $("bubble"); bub.classList.remove("show");
+  if(bgm){ try{ bgm.pause(); bgm.currentTime = 0; bgmOn = false; }catch(e){} }
+  showView("view-logo");
+}
+
+/* ---------- 启动 ---------- */
+function start(){
+  load();
+  if(location.hash === "#demo"){ S.firstSeen = false; stats.dog = stats.dog || "samoyed"; }
+  buildSelect();
+  initRouting();
+  initFeed(); initBath(); initPlay();
+  initName();
+  mergeNewLines();
+  initChat();
+  initBgm();
+  initPet();
+  initSet();
+  document.querySelectorAll(".mask .close").forEach(function(c){
+    c.addEventListener("click", function(){ closeMask(c.dataset.close); });
+  });
+  $("btnFeed").addEventListener("click", function(){ openMask("maskFeed"); });
+  $("btnBath").addEventListener("click", function(){ openMask("maskBath"); });
+  $("btnPlay").addEventListener("click", function(){ openMask("maskPlay"); });
+
+  setInterval(tickDecay, 1000);
+  setInterval(function(){ save(); }, 10000);
+  setInterval(function(){
+    if(!$("view-main").classList.contains("on")) return;
+    if(state.act === "idle" && !state.sleeping && Math.random() < .5) autoBark();
+  }, 26000);
+  /* 看门狗：每 2 秒兜底"贴图在走但位置已停"的残留踏步态，条件允许时恢复自主移动 */
+  setInterval(function(){
+    if(!$("view-main").classList.contains("on")) return;
+    if((state.act === "walk" || state.act === "run") && !move.on){
+      doIdle(true);
+      if(!state.sleeping && !$("toyLayer").children.length && !document.querySelector(".mask.on")){
+        scheduleRoam(200 + Math.random()*400);
+      }
+    }
+  }, 2000);
+  document.addEventListener("visibilitychange", function(){
+    if(document.hidden) save();
+    else {
+      /* 切回前台只刷新数值与界面，不重置小狗位置与动作（位置已随 save 存档） */
+      load(); renderBars(); renderAvatar();
+    }
+  });
+
+  if(S.firstSeen){
+    showView("view-logo");
+  } else {
+    enterFlow();
+  }
+}
+start();
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("sw.js").catch(function(){ /* file:// 或不可用环境自动跳过 */ });
+}
+
+<!-- CHUNK3: 交互 -->
+</script>
+</body>
+</html>
